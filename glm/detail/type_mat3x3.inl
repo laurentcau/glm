@@ -468,9 +468,7 @@ namespace glm
 	GLM_FUNC_QUALIFIER typename mat<3, 3, T, Q>::col_type operator*(mat<3, 3, T, Q> const& m, typename mat<3, 3, T, Q>::row_type const& v)
 	{
 		return typename mat<3, 3, T, Q>::col_type(
-			m[0][0] * v.x + m[1][0] * v.y + m[2][0] * v.z,
-			m[0][1] * v.x + m[1][1] * v.y + m[2][1] * v.z,
-			m[0][2] * v.x + m[1][2] * v.y + m[2][2] * v.z);
+			m[0] * v.splatX() + m[1] * v.splatY() + m[2] * v.splatZ());
 	}
 
 	template<typename T, qualifier Q>
@@ -482,40 +480,58 @@ namespace glm
 			m[2][0] * v.x + m[2][1] * v.y + m[2][2] * v.z);
 	}
 
+	namespace detail
+	{
+		template<typename T, qualifier Q, bool use_simd>
+		struct mul3x3 {};
+
+		template<typename T, qualifier Q>
+		struct mul3x3<T, Q, true>
+		{
+			GLM_FUNC_QUALIFIER static mat<3, 3, T, Q> call(mat<3, 3, T, Q> const& m1, mat<3, 3, T, Q> const& m2)
+			{
+				typename mat<3, 3, T, qualifier(to_aligned<Q>::value)>::col_type const SrcA0 = m1[0];
+				typename mat<3, 3, T, qualifier(to_aligned<Q>::value)>::col_type const SrcA1 = m1[1];
+				typename mat<3, 3, T, qualifier(to_aligned<Q>::value)>::col_type const SrcA2 = m1[2];
+
+				typename mat<3, 3, T, qualifier(to_aligned<Q>::value)>::col_type const SrcB0 = m2[0];
+				typename mat<3, 3, T, qualifier(to_aligned<Q>::value)>::col_type const SrcB1 = m2[1];
+				typename mat<3, 3, T, qualifier(to_aligned<Q>::value)>::col_type const SrcB2 = m2[2];
+
+				mat<3, 3, T, qualifier(to_aligned<Q>::value)> Result;
+				Result[0] = SrcA2 * SrcB0.splatZ() + SrcA1 * SrcB0.splatY() + SrcA0 * SrcB0.splatX();
+				Result[1] = SrcA2 * SrcB1.splatZ() + SrcA1 * SrcB1.splatY() + SrcA0 * SrcB1.splatX();
+				Result[2] = SrcA2 * SrcB2.splatZ() + SrcA1 * SrcB2.splatY() + SrcA0 * SrcB2.splatX();
+				return mat<3, 3, T, Q>(Result);
+			}
+		};
+
+		template<typename T, qualifier Q>
+		struct mul3x3<T, Q, false>
+		{
+			GLM_FUNC_QUALIFIER static mat<3, 3, T, Q> call(mat<3, 3, T, Q> const& m1, mat<3, 3, T, Q> const& m2)
+			{
+				typename mat<3, 3, T, Q>::col_type const& SrcA0 = m1[0];
+				typename mat<3, 3, T, Q>::col_type const& SrcA1 = m1[1];
+				typename mat<3, 3, T, Q>::col_type const& SrcA2 = m1[2];
+
+				typename mat<3, 3, T, Q>::col_type const& SrcB0 = m2[0];
+				typename mat<3, 3, T, Q>::col_type const& SrcB1 = m2[1];
+				typename mat<3, 3, T, Q>::col_type const& SrcB2 = m2[2];
+
+				mat<3, 3, T, Q> Result;
+				Result[0] = SrcA2 * SrcB0.z + SrcA1 * SrcB0.y + SrcA0 * SrcB0.x;
+				Result[1] = SrcA2 * SrcB1.z + SrcA1 * SrcB1.y + SrcA0 * SrcB1.x;
+				Result[2] = SrcA2 * SrcB2.z + SrcA1 * SrcB2.y + SrcA0 * SrcB2.x;
+				return Result;
+			}
+		};
+	}
+
 	template<typename T, qualifier Q>
 	GLM_FUNC_QUALIFIER mat<3, 3, T, Q> operator*(mat<3, 3, T, Q> const& m1, mat<3, 3, T, Q> const& m2)
 	{
-		T const SrcA00 = m1[0][0];
-		T const SrcA01 = m1[0][1];
-		T const SrcA02 = m1[0][2];
-		T const SrcA10 = m1[1][0];
-		T const SrcA11 = m1[1][1];
-		T const SrcA12 = m1[1][2];
-		T const SrcA20 = m1[2][0];
-		T const SrcA21 = m1[2][1];
-		T const SrcA22 = m1[2][2];
-
-		T const SrcB00 = m2[0][0];
-		T const SrcB01 = m2[0][1];
-		T const SrcB02 = m2[0][2];
-		T const SrcB10 = m2[1][0];
-		T const SrcB11 = m2[1][1];
-		T const SrcB12 = m2[1][2];
-		T const SrcB20 = m2[2][0];
-		T const SrcB21 = m2[2][1];
-		T const SrcB22 = m2[2][2];
-
-		mat<3, 3, T, Q> Result;
-		Result[0][0] = SrcA00 * SrcB00 + SrcA10 * SrcB01 + SrcA20 * SrcB02;
-		Result[0][1] = SrcA01 * SrcB00 + SrcA11 * SrcB01 + SrcA21 * SrcB02;
-		Result[0][2] = SrcA02 * SrcB00 + SrcA12 * SrcB01 + SrcA22 * SrcB02;
-		Result[1][0] = SrcA00 * SrcB10 + SrcA10 * SrcB11 + SrcA20 * SrcB12;
-		Result[1][1] = SrcA01 * SrcB10 + SrcA11 * SrcB11 + SrcA21 * SrcB12;
-		Result[1][2] = SrcA02 * SrcB10 + SrcA12 * SrcB11 + SrcA22 * SrcB12;
-		Result[2][0] = SrcA00 * SrcB20 + SrcA10 * SrcB21 + SrcA20 * SrcB22;
-		Result[2][1] = SrcA01 * SrcB20 + SrcA11 * SrcB21 + SrcA21 * SrcB22;
-		Result[2][2] = SrcA02 * SrcB20 + SrcA12 * SrcB21 + SrcA22 * SrcB22;
-		return Result;
+		return detail::mul3x3<T, Q, detail::use_simd<Q>::value>::call(m1, m2);
 	}
 
 	template<typename T, qualifier Q>

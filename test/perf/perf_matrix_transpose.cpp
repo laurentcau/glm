@@ -61,7 +61,7 @@ static int comp_mat2_transpose(std::size_t Samples)
 	return Error;
 }
 
-template <typename packedMatType, typename alignedMatType>
+template <typename packedMatType, typename alignedMatType, typename unalignedSIMDMatType>
 static int comp_mat3_transpose(std::size_t Samples)
 {
 	typedef typename packedMatType::value_type T;
@@ -76,18 +76,24 @@ static int comp_mat3_transpose(std::size_t Samples)
 	std::vector<alignedMatType> SIMD;
 	std::printf("- SIMD: %d us\n", launch_mat_transpose<alignedMatType>(SIMD, Scale, Samples));
 
+	std::vector<unalignedSIMDMatType> SIMDU;
+	std::printf("- SIMD Unaligned: %d us\n", launch_mat_transpose<unalignedSIMDMatType>(SIMDU, Scale, Samples));
+
 	for(std::size_t i = 0; i < Samples; ++i)
 	{
 		packedMatType const A = SISD[i];
 		packedMatType const B = SIMD[i];
 		Error += glm::all(glm::equal(A, B, static_cast<T>(0.001))) ? 0 : 1;
 		assert(!Error);
+		packedMatType const C = SIMD[i];
+		Error += glm::all(glm::equal(A, C, static_cast<T>(0.001))) ? 0 : 1;
+		assert(!Error);
 	}
 	
 	return Error;
 }
 
-template <typename packedMatType, typename alignedMatType>
+template <typename packedMatType, typename alignedMatType, typename unalignedSIMDMatType>
 static int comp_mat4_transpose(std::size_t Samples)
 {
 	typedef typename packedMatType::value_type T;
@@ -102,11 +108,17 @@ static int comp_mat4_transpose(std::size_t Samples)
 	std::vector<alignedMatType> SIMD;
 	std::printf("- SIMD: %d us\n", launch_mat_transpose<alignedMatType>(SIMD, Scale, Samples));
 
+	std::vector<unalignedSIMDMatType> SIMDU;
+	std::printf("- SIMD Unaligned: %d us\n", launch_mat_transpose<unalignedSIMDMatType>(SIMDU, Scale, Samples));
+
 	for(std::size_t i = 0; i < Samples; ++i)
 	{
 		packedMatType const A = SISD[i];
 		packedMatType const B = SIMD[i];
 		Error += glm::all(glm::equal(A, B, static_cast<T>(0.001))) ? 0 : 1;
+		assert(!Error);
+		packedMatType const C = SIMD[i];
+		Error += glm::all(glm::equal(A, C, static_cast<T>(0.001))) ? 0 : 1;
 		assert(!Error);
 	}
 	
@@ -115,27 +127,27 @@ static int comp_mat4_transpose(std::size_t Samples)
 
 int main()
 {
-	std::size_t const Samples = 100000;
+	std::size_t const Samples = 1000000;
 
 	int Error = 0;
 
 	std::printf("glm::transpose(mat2):\n");
 	Error += comp_mat2_transpose<glm::mat2, glm::aligned_mat2>(Samples);
-	
+
 	std::printf("glm::transpose(dmat2):\n");
 	Error += comp_mat2_transpose<glm::dmat2, glm::aligned_dmat2>(Samples);
 
 	std::printf("glm::transpose(mat3):\n");
-	Error += comp_mat3_transpose<glm::mat3, glm::aligned_mat3>(Samples);
-	
+	Error += comp_mat3_transpose<glm::packed_mat3, glm::aligned_mat3, glm::usimd_mat3>(Samples);
+
 	std::printf("glm::transpose(dmat3):\n");
-	Error += comp_mat3_transpose<glm::dmat3, glm::aligned_dmat3>(Samples);
+	Error += comp_mat3_transpose<glm::packed_dmat3, glm::aligned_dmat3, glm::usimd_dmat3>(Samples);
 
 	std::printf("glm::transpose(mat4):\n");
-	Error += comp_mat4_transpose<glm::mat4, glm::aligned_mat4>(Samples);
+	Error += comp_mat4_transpose<glm::packed_mat4, glm::aligned_mat4, glm::usimd_mat4>(Samples);
 	
 	std::printf("glm::transpose(dmat4):\n");
-	Error += comp_mat4_transpose<glm::dmat4, glm::aligned_dmat4>(Samples);
+	Error += comp_mat4_transpose<glm::packed_dmat4, glm::aligned_dmat4, glm::usimd_dmat4>(Samples);
 
 	return Error;
 }

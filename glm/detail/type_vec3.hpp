@@ -22,6 +22,11 @@ namespace glm
 		typedef vec<3, T, Q> type;
 		typedef vec<3, bool, Q> bool_type;
 
+		enum is_aligned
+		{
+			value = detail::is_aligned<Q>::value
+		};
+
 		// -- Data --
 
 #		if GLM_SILENT_WARNINGS == GLM_ENABLE
@@ -53,7 +58,7 @@ namespace glm
 				struct{ T r, g, b; };
 				struct{ T s, t, p; };
 
-				typename detail::storage<3, T, detail::is_aligned<Q>::value>::type data;
+				typename detail::storage<3, T, detail::is_aligned<Q>::value, detail::use_simd<Q>::value>::type data;
 
 #				if GLM_CONFIG_SWIZZLE == GLM_SWIZZLE_OPERATOR
 					GLM_SWIZZLE3_2_MEMBERS(T, Q, x, y, z)
@@ -95,6 +100,10 @@ namespace glm
 
 		GLM_FUNC_DECL GLM_CONSTEXPR T & operator[](length_type i);
 		GLM_FUNC_DECL GLM_CONSTEXPR T const& operator[](length_type i) const;
+
+		GLM_FUNC_DECL vec<3, T, Q> splatX() const;
+		GLM_FUNC_DECL vec<3, T, Q> splatY() const;
+		GLM_FUNC_DECL vec<3, T, Q> splatZ() const;
 
 		// -- Implicit basic constructors --
 
@@ -428,6 +437,10 @@ namespace glm
 
 	template<qualifier Q>
 	GLM_FUNC_DECL GLM_CONSTEXPR vec<3, bool, Q> operator||(vec<3, bool, Q> const& v1, vec<3, bool, Q> const& v2);
+
+
+
+
 }//namespace glm
 
 #ifndef GLM_EXTERNAL_TEMPLATE

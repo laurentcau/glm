@@ -14,5 +14,11 @@ namespace glm
 	/// @see <a href="http://www.opengl.org/registry/doc/GLSLangSpec.4.20.8.pdf">GLSL 4.20.8 specification, section 4.1.5 Vectors</a>
 	typedef vec<4, float, defaultp>		vec4;
 
+	typedef vec<4, float, packed_highp>		packed_vec4;
+
+#if GLM_CONFIG_SIMD == GLM_ENABLE
+	typedef vec<4, float, unaligned_simd>	usimd_vec4;
+#endif 
+
 	/// @}
 }//namespace glm

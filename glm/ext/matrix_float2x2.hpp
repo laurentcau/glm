@@ -19,5 +19,7 @@ namespace glm
 	/// @see <a href="http://www.opengl.org/registry/doc/GLSLangSpec.4.20.8.pdf">GLSL 4.20.8 specification, section 4.1.6 Matrices</a>
 	typedef mat<2, 2, float, defaultp>		mat2;
 
+	typedef mat<2, 2, float, packed_highp> packed_mat2;
+
 	/// @}
 }//namespace glm

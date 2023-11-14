@@ -20,6 +20,11 @@ namespace glm
 		return (y < x) ? y : x;
 	}
 
+	template<typename T>
+	struct TMin {
+		T operator()(const T& a, const T& b) { return min(a, b); }
+	};
+
 	// max
 	template<typename genType>
 	GLM_FUNC_QUALIFIER GLM_CONSTEXPR genType max(genType x, genType y)
@@ -29,6 +34,11 @@ namespace glm
 		return (x < y) ? y : x;
 	}
 
+	template<typename T>
+	struct TMax {
+		T operator()(const T& a, const T& b) { return max(a, b); }
+	};
+
 	// abs
 	template<>
 	GLM_FUNC_QUALIFIER GLM_CONSTEXPR int abs(int x)
@@ -36,6 +46,11 @@ namespace glm
 		int const y = x >> (sizeof(int) * 8 - 1);
 		return (x ^ y) - y;
 	}
+
+	template<typename T>
+	struct TAbs {
+		T operator()(const T& a) { return abs(a); }
+	};
 
 	// round
 #	if GLM_HAS_CXX11_STL
@@ -50,6 +65,11 @@ namespace glm
 		}
 #	endif
 
+		template<typename T>
+		struct TRound {
+			T operator()(const T& a) { return round(a); }
+		};
+
 	// trunc
 #	if GLM_HAS_CXX11_STL
 		using ::std::trunc;
@@ -62,6 +82,16 @@ namespace glm
 			return x < static_cast<genType>(0) ? -std::floor(-x) : std::floor(x);
 		}
 #	endif
+
+		template<typename T>
+		struct TTrunc {
+			T operator()(const T& a) { return trunc(a); }
+		};
+
+		template<typename T>
+		struct TFmod {
+			T operator()(const T& a, const T& b) { return std::fmod(a, b); }
+		};
 
 }//namespace glm
 
@@ -223,7 +253,7 @@ namespace detail
 	{
 		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& x, vec<L, T, Q> const& y)
 		{
-			return detail::functor2<vec, L, T, Q>::call(min, x, y);
+			return detail::functor2<vec, L, T, Q>::call(TMin<T>(), x, y);
 		}
 	};
 
@@ -232,7 +262,7 @@ namespace detail
 	{
 		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& x, vec<L, T, Q> const& y)
 		{
-			return detail::functor2<vec, L, T, Q>::call(max, x, y);
+			return detail::functor2<vec, L, T, Q>::call(TMax<T>(), x, y);
 		}
 	};
 

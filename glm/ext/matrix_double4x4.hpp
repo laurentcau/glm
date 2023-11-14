@@ -19,5 +19,9 @@ namespace glm
 	/// @see <a href="http://www.opengl.org/registry/doc/GLSLangSpec.4.20.8.pdf">GLSL 4.20.8 specification, section 4.1.6 Matrices</a>
 	typedef mat<4, 4, double, defaultp>		dmat4;
 
+#if GLM_CONFIG_SIMD == GLM_ENABLE
+	typedef mat<4, 4, double, unaligned_simd> usimd_dmat4;
+#endif 
+
 	/// @}
 }//namespace glm

@@ -15,10 +15,11 @@
 #include <cstdio>
 
 template <typename matType, typename vecType>
+__declspec(noinline)
 static void test_vec_mul_mat(matType const& M, std::vector<vecType> const& I, std::vector<vecType>& O)
 {
 	for (std::size_t i = 0, n = I.size(); i < n; ++i)
-		O[i] = I[i] * M;
+		O[i] = M * I[i];
 }
 
 template <typename matType, typename vecType>
@@ -28,6 +29,8 @@ static int launch_vec_mul_mat(std::vector<vecType>& O, matType const& Transform,
 
 	std::vector<vecType> I(Samples);
 	O.resize(Samples);
+
+	memset(I.data(), 0, I.size() * sizeof(vecType));
 
 	for(std::size_t i = 0; i < Samples; ++i)
 		I[i] = Scale * static_cast<T>(i);
@@ -46,7 +49,7 @@ static int comp_vec2_mul_mat2(std::size_t Samples)
 	
 	int Error = 0;
 
-	packedMatType const Transform(1, 2, 3, 4);
+	packedMatType Transform = packedMatType(1, 2, 3, 4);
 	packedVecType const Scale(0.01, 0.02);
 
 	std::vector<packedVecType> SISD;
@@ -65,7 +68,9 @@ static int comp_vec2_mul_mat2(std::size_t Samples)
 	return Error;
 }
 
-template <typename packedMatType, typename packedVecType, typename alignedMatType, typename alignedVecType>
+template <typename packedMatType, typename packedVecType,
+	typename alignedMatType, typename alignedVecType,
+	typename unalignedMatType, typename unalignedVecType>
 static int comp_vec3_mul_mat3(std::size_t Samples)
 {
 	typedef typename packedMatType::value_type T;
@@ -81,17 +86,24 @@ static int comp_vec3_mul_mat3(std::size_t Samples)
 	std::vector<alignedVecType> SIMD;
 	std::printf("- SIMD: %d us\n", launch_vec_mul_mat<alignedMatType, alignedVecType>(SIMD, Transform, Scale, Samples));
 
+	std::vector<unalignedVecType> SIMDU;
+	std::printf("- SIMD Unaligned: %d us\n", launch_vec_mul_mat<unalignedMatType, unalignedVecType>(SIMDU, Transform, Scale, Samples));
+
 	for(std::size_t i = 0; i < Samples; ++i)
 	{
 		packedVecType const A = SISD[i];
 		packedVecType const B = SIMD[i];
+		Error += glm::all(glm::equal(A, B, static_cast<T>(0.001))) ? 0 : 1;
+		packedVecType const C = SIMDU[i];
 		Error += glm::all(glm::equal(A, B, static_cast<T>(0.001))) ? 0 : 1;
 	}
 	
 	return Error;
 }
 
-template <typename packedMatType, typename packedVecType, typename alignedMatType, typename alignedVecType>
+template <typename packedMatType, typename packedVecType, 
+		 typename alignedMatType, typename alignedVecType,
+		typename unalignedMatType, typename unalignedVecType>
 static int comp_vec4_mul_mat4(std::size_t Samples)
 {
 	typedef typename packedMatType::value_type T;
@@ -107,10 +119,15 @@ static int comp_vec4_mul_mat4(std::size_t Samples)
 	std::vector<alignedVecType> SIMD;
 	std::printf("- SIMD: %d us\n", launch_vec_mul_mat<alignedMatType, alignedVecType>(SIMD, Transform, Scale, Samples));
 
+	std::vector<unalignedVecType> SIMDU;
+	std::printf("- SIMD Unaligned: %d us\n", launch_vec_mul_mat<unalignedMatType, unalignedVecType>(SIMDU, Transform, Scale, Samples));
+
 	for(std::size_t i = 0; i < Samples; ++i)
 	{
 		packedVecType const A = SISD[i];
 		packedVecType const B = SIMD[i];
+		Error += glm::all(glm::equal(A, B, static_cast<T>(0.001))) ? 0 : 1;
+		packedVecType const C = SIMDU[i];
 		Error += glm::all(glm::equal(A, B, static_cast<T>(0.001))) ? 0 : 1;
 	}
 	
@@ -124,22 +141,22 @@ int main()
 	int Error = 0;
 
 	std::printf("vec2 * mat2:\n");
-	Error += comp_vec2_mul_mat2<glm::mat2, glm::vec2, glm::aligned_mat2, glm::aligned_vec2>(Samples);
-	
+	Error += comp_vec2_mul_mat2<glm::packed_mat2, glm::packed_vec2, glm::aligned_mat2, glm::aligned_vec2>(Samples);
+
 	std::printf("dvec2 * dmat2:\n");
-	Error += comp_vec2_mul_mat2<glm::dmat2, glm::dvec2,glm::aligned_dmat2, glm::aligned_dvec2>(Samples);
+	Error += comp_vec2_mul_mat2<glm::packed_dmat2, glm::packed_dvec2, glm::aligned_dmat2, glm::aligned_dvec2>(Samples);
 
 	std::printf("vec3 * mat3:\n");
-	Error += comp_vec3_mul_mat3<glm::mat3, glm::vec3, glm::aligned_mat3, glm::aligned_vec3>(Samples);
-	
+	Error += comp_vec3_mul_mat3<glm::packed_mat3, glm::packed_vec3, glm::aligned_mat3, glm::aligned_vec3, glm::usimd_mat3, glm::usimd_vec3>(Samples);
+
 	std::printf("dvec3 * dmat3:\n");
-	Error += comp_vec3_mul_mat3<glm::dmat3, glm::dvec3, glm::aligned_dmat3, glm::aligned_dvec3>(Samples);
+	Error += comp_vec3_mul_mat3<glm::packed_dmat3, glm::packed_dvec3, glm::aligned_dmat3, glm::aligned_dvec3, glm::usimd_dmat3, glm::usimd_dvec3>(Samples);
 
 	std::printf("vec4 * mat4:\n");
-	Error += comp_vec4_mul_mat4<glm::mat4, glm::vec4, glm::aligned_mat4, glm::aligned_vec4>(Samples);
+	Error += comp_vec4_mul_mat4<glm::packed_mat4, glm::packed_vec4, glm::aligned_mat4, glm::aligned_vec4, glm::usimd_mat4, glm::usimd_vec4>(Samples);
 	
 	std::printf("dvec4 * dmat4:\n");
-	Error += comp_vec4_mul_mat4<glm::dmat4, glm::dvec4, glm::aligned_dmat4, glm::aligned_dvec4>(Samples);
+	Error += comp_vec4_mul_mat4<glm::packed_dmat4, glm::packed_dvec4, glm::aligned_dmat4, glm::aligned_dvec4, glm::usimd_dmat4, glm::usimd_dvec4>(Samples);
 
 	return Error;
 }
