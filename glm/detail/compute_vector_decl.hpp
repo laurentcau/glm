@@ -1,6 +1,8 @@
 
 #pragma once
 #include <functional>
+#include "_vectorize.hpp"
+
 namespace glm {
 	namespace detail
 	{
@@ -45,7 +47,6 @@ namespace glm {
 
 		template<length_t L, typename T, qualifier Q, int IsInt, std::size_t Size, bool UseSimd>
 		struct compute_vec_bitwise_not {};
-
 
 		template<length_t L, typename T, qualifier Q>
 		struct compute_vec_add<L, T, Q, false>
@@ -92,24 +93,15 @@ namespace glm {
 			}
 		};
 
-		template<length_t L, typename T, qualifier Q>
-		struct compute_splat<L, T, Q, false> {
-			template<int c>
-			GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<L, T, Q> call(vec<L, T, Q> const& a)
-			{
-				vec<L, T, Q> v;
-				for (int i = 0; i < L; ++i)
-					v[i] = a[c];
-				return v;
-			}
-		};
-
 		template<length_t L, typename T, qualifier Q, int IsInt, std::size_t Size>
 		struct compute_vec_and<L, T, Q, IsInt, Size, false>
 		{
 			GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
 			{
-				return detail::functor2<vec, L, T, Q>::call(std::bit_and<T>(), a, b);
+				vec<L, T, Q> v(a);
+				for (int i = 0; i < L; ++i)
+					v[i] &= static_cast<T>(b[i]);
+				return v;
 			}
 		};
 
@@ -118,7 +110,10 @@ namespace glm {
 		{
 			GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
 			{
-				return detail::functor2<vec, L, T, Q>::call(std::bit_or<T>(), a, b);
+				vec<L, T, Q> v(a);
+				for (int i = 0; i < L; ++i)
+					v[i] |= static_cast<T>(b[i]);
+				return v;
 			}
 		};
 
@@ -127,7 +122,10 @@ namespace glm {
 		{
 			GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
 			{
-				return detail::functor2<vec, L, T, Q>::call(std::bit_xor<T>(), a, b);
+				vec<L, T, Q> v(a);
+				for (int i = 0; i < L; ++i)
+					v[i] ^= static_cast<T>(b[i]);
+				return v;
 			}
 		};
 
@@ -136,9 +134,9 @@ namespace glm {
 		{
 			GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
 			{
-				vec<L, T, Q> v;
+				vec<L, T, Q> v(a);
 				for (int i = 0; i < L; ++i)
-					v[i] = a[i] << b[i];
+					v[i] <<= static_cast<T>(b[i]);
 				return v;
 			}
 		};
@@ -148,9 +146,9 @@ namespace glm {
 		{
 			GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
 			{
-				vec<L, T, Q> v;
+				vec<L, T, Q> v(a);
 				for (int i = 0; i < L; ++i)
-					v[i] = a[i] >> b[i];
+					v[i] >>= static_cast<T>(b[i]);
 				return v;
 			}
 		};
@@ -181,14 +179,12 @@ namespace glm {
 		{
 			GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<L, T, Q> call(vec<L, T, Q> const& a)
 			{
-				vec<L, T, Q> v;
+				vec<L, T, Q> v(a);
 				for (int i = 0; i < L; ++i)
-					v[i] = ~a[i];
+					v[i] = ~v[i];
 				return v;
 			}
 		};
-
-
 
 	}
 }

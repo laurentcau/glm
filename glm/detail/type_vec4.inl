@@ -513,30 +513,6 @@ namespace detail
 		}
 	}
 
-	template<typename T, qualifier Q>
-	GLM_FUNC_QUALIFIER vec<4, T, Q> vec<4, T, Q>::splatX() const
-	{
-		return detail::compute_splat<4, T, Q, detail::use_simd<Q>::value>::call<0>(*this);
-	}
-
-	template<typename T, qualifier Q>
-	GLM_FUNC_QUALIFIER vec<4, T, Q> vec<4, T, Q>::splatY() const
-	{
-		return detail::compute_splat<4, T, Q, detail::use_simd<Q>::value>::call<1>(*this);
-	}
-
-	template<typename T, qualifier Q>
-	GLM_FUNC_QUALIFIER vec<4, T, Q> vec<4, T, Q>::splatZ() const
-	{
-		return detail::compute_splat<4, T, Q, detail::use_simd<Q>::value>::call<2>(*this);
-	}
-
-	template<typename T, qualifier Q>
-	GLM_FUNC_QUALIFIER vec<4, T, Q> vec<4, T, Q>::splatW() const
-	{
-		return detail::compute_splat<4, T, Q, detail::use_simd<Q>::value>::call<3>(*this);
-	}
-
 	// -- Unary arithmetic operators --
 
 #	if GLM_CONFIG_DEFAULTED_FUNCTIONS == GLM_DISABLE
@@ -809,7 +785,7 @@ namespace detail
 	template<typename U>
 	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<4, T, Q> & vec<4, T, Q>::operator>>=(vec<4, U, Q> const& v)
 	{
-		return (*this = detail::compute_vec4_shift_right<4, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::use_simd<Q>::value>::call(*this, vec<4, T, Q>(v)));
+		return (*this = detail::compute_vec_shift_right<4, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::use_simd<Q>::value>::call(*this, vec<4, T, Q>(v)));
 	}
 
 	// -- Unary constant operators --
@@ -1167,6 +1143,18 @@ namespace detail
 #	include "type_vec_simd.inl"
 
 namespace glm {
+#if GLM_ARCH & GLM_ARCH_NEON_BIT && !GLM_CONFIG_XYZW_ONLY
+	CTORSL(4, CTOR_FLOAT);
+	CTORSL(4, CTOR_INT);
+	CTORSL(4, CTOR_UINT);
+	CTORSL(4, CTOR_VECF_INT4);
+	CTORSL(4, CTOR_VECF_UINT4);
+	CTORSL(4, CTOR_VECF_VECF);
+	CTORSL(4, CTOR_VECF_VECI);
+	CTORSL(4, CTOR_VECF_VECU);
+#endif// GLM_ARCH & GLM_ARCH_NEON_BIT
+
+#if GLM_ARCH & GLM_ARCH_SSE2_BIT
 	CTORSL(4, CTOR_FLOAT);
 	CTORSL(4, CTOR_DOUBLE);
 	CTORSL(4, CTOR_FLOAT4);
@@ -1209,6 +1197,7 @@ namespace glm {
 	}
 #endif
 
+#endif//GLM_ARCH & GLM_ARCH_SSE2_BIT
 }
 
 #endif

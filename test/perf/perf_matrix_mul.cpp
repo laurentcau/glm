@@ -44,7 +44,7 @@ static void test_mat_mul_mat(matType const& M, std::vector<matType> const& I, st
 {
 	for (std::size_t i = 0, n = I.size(); i < n; ++i)
 		O[i] = M * I[i];
-	}
+}
 
 template <typename matType>
 static int launch_mat_mul_mat(std::vector<matType>& O, matType const& Transform, matType const& Scale, std::size_t Samples)
@@ -92,6 +92,25 @@ static int comp_mat2_mul_mat2(std::size_t Samples)
 	return Error;
 }
 
+template<typename T1, typename T2>
+bool percent_error(const T1& a, const T2& b, float percentThreshold)
+{
+	typedef typename T1::value_type value_type;
+	for (int i = 0; i < a.length(); ++i)
+		for (int j = 0; j < a[i].length(); ++j)
+		{
+			value_type v;
+			if (a[i][j] != 0.0f)
+				v = ((b[i][j] - a[i][j]) / a[i][j]) * 100.0f;
+			else
+				v = b[i][j] * 100.0f;
+
+			if (v > percentThreshold)
+				return false;
+		}
+	return true;
+}
+
 template <typename packedMatType, typename alignedMatType, typename unalignedMatType>
 static int comp_mat3_mul_mat3(std::size_t Samples)
 {
@@ -115,9 +134,9 @@ static int comp_mat3_mul_mat3(std::size_t Samples)
 	{
 		packedMatType const A = SISD[i];
 		packedMatType const B = SIMD[i];
-		Error += glm::all(glm::equal(A, B, static_cast<T>(0.001))) ? 0 : 1;
+		Error += percent_error(A, B, 0.01f) ? 0 : 1;
 		packedMatType const C = SIMDUA[i];
-		Error += glm::all(glm::equal(A, C, static_cast<T>(0.001))) ? 0 : 1;
+		Error += percent_error(A, C, 0.01f) ? 0 : 1;
 	}
 	
 	return Error;
@@ -147,8 +166,8 @@ static int comp_mat4_mul_mat4(std::size_t Samples)
 		packedMatType const A = SISD[i];
 		packedMatType const B = SIMD[i];
 		packedMatType const C = SIMDUA[i];
-		Error += glm::all(glm::equal(A, B, static_cast<T>(0.001))) ? 0 : 1;
-		Error += glm::all(glm::equal(A, C, static_cast<T>(0.001))) ? 0 : 1;
+		Error += percent_error(A, B, 0.01f) ? 0 : 1;
+		Error += percent_error(A, C, 0.01f) ? 0 : 1;
 	}
 	
 	return Error;

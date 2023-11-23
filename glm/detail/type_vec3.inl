@@ -199,25 +199,6 @@ namespace glm
 		}
 	}
 
-	template<typename T, qualifier Q>
-	GLM_FUNC_QUALIFIER vec<3, T, Q> vec<3, T, Q>::splatX() const
-	{
-		return detail::compute_splat<3, T, Q, detail::use_simd<Q>::value>::call<0>(*this);
-	}
-
-	template<typename T, qualifier Q>
-	GLM_FUNC_QUALIFIER vec<3, T, Q> vec<3, T, Q>::splatY() const
-	{
-		return detail::compute_splat<3, T, Q, detail::use_simd<Q>::value>::call<1>(*this);
-	}
-
-	template<typename T, qualifier Q>
-	GLM_FUNC_QUALIFIER vec<3, T, Q> vec<3, T, Q>::splatZ() const
-	{
-		return detail::compute_splat<3, T, Q, detail::use_simd<Q>::value>::call<2>(*this);
-	}
-
-
 	// -- Unary arithmetic operators --
 
 #	if GLM_CONFIG_DEFAULTED_FUNCTIONS == GLM_DISABLE
@@ -287,7 +268,7 @@ namespace glm
 	template<typename U>
 	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, T, Q> & vec<3, T, Q>::operator*=(U scalar)
 	{
-		return (*this = detail::compute_vec_mul<3, T, Q, detail::use_simd<Q>::value>::call(*this, vec<3, T, Q>((T)scalar)));
+		return (*this = detail::compute_vec_mul<3, T, Q, detail::use_simd<Q>::value>::call(*this, vec<3, T, Q>(static_cast<T>(scalar))));
 	}
 
 	template<typename T, qualifier Q>
@@ -395,7 +376,7 @@ namespace glm
 	template<typename U>
 	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, T, Q> & vec<3, T, Q>::operator&=(vec<1, U, Q> const& v)
 	{
-		return (*this = detail::compute_vec_and<3, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::use_simd<Q>::value>::call(*this, vec<3, T, Q>(v)));;
+		return (*this = detail::compute_vec_and<3, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::use_simd<Q>::value>::call(*this, vec<3, T, Q>(v)));
 	}
 
 	template<typename T, qualifier Q>
@@ -527,7 +508,7 @@ namespace glm
 	template<typename T, qualifier Q>
 	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, T, Q> operator+(vec<1, T, Q> const& scalar, vec<3, T, Q> const& v)
 	{
-		return vec<3, T, Q>(v1) += v;
+		return vec<3, T, Q>(scalar) += v;
 	}
 
 	template<typename T, qualifier Q>
@@ -600,13 +581,13 @@ namespace glm
 	template<typename T, qualifier Q>
 	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, T, Q> operator/(vec<3, T, Q> const& v, T scalar)
 	{
-		return vec<3, T, Q>(v) *= 1.0f/scalar;
+		return vec<3, T, Q>(v) *= 1/scalar;
 	}
 
 	template<typename T, qualifier Q>
 	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, T, Q> operator/(vec<3, T, Q> const& v, vec<1, T, Q> const& scalar)
 	{
-		return vec<3, T, Q>(v) *= 1.0f/scalar.x;
+		return vec<3, T, Q>(v) *= 1/scalar.x;
 	}
 
 	template<typename T, qualifier Q>
@@ -853,6 +834,19 @@ namespace glm
 #	include "type_vec_simd.inl"
 
 namespace glm {
+
+#if (GLM_ARCH & GLM_ARCH_NEON_BIT) && !GLM_CONFIG_XYZW_ONLY
+	CTORSL(3, CTOR_FLOAT);
+	CTORSL(3, CTOR_INT);
+	CTORSL(3, CTOR_UINT);
+	CTORSL(3, CTOR_VECF_INT3);
+	CTORSL(3, CTOR_VECF_UINT3);
+	CTORSL(3, CTOR_VECF_VECF);
+	CTORSL(3, CTOR_VECF_VECI);
+	CTORSL(3, CTOR_VECF_VECU);
+#endif
+
+#if GLM_ARCH & GLM_ARCH_SSE2_BIT
 	CTORSL(3, CTOR_FLOAT_COPY3);
 	CTORSL(3, CTOR_DOUBLE_COPY3);
 	CTORSL(3, CTOR_FLOAT);
@@ -860,16 +854,6 @@ namespace glm {
 	CTORSL(3, CTOR_INT);
 	CTORSL(3, CTOR_INT3);
 	CTORSL(3, CTOR_VECF_INT3);
-
-	template<>
-	template<>
-	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, float, aligned_highp>::vec(const vec<3, float, unaligned_simd_highp>& v) :
-		data(v.data){}
-	
-	template<>
-	template<>
-	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, float, unaligned_simd_highp>::vec(const vec<3, float, aligned_highp>& v) :
-		data(v.data) {}
 
 	template<>
 	template<>
@@ -897,6 +881,21 @@ namespace glm {
 
 	CTORSL(3, CTOR_DOUBLE);
 	//CTORSL(3, CTOR_INT64);
+
+	template<>
+	template<>
+	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, float, aligned_highp>::vec(const vec<3, float, unaligned_simd_highp>& v) :
+		data(v.data) {}
+
+	template<>
+	template<>
+	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, float, unaligned_simd_highp>::vec(const vec<3, float, aligned_highp>& v) :
+		data(v.data) {}
+
+
+#endif //GLM_ARCH & GLM_ARCH_SSE2_BITt
+
+
 }
 
 #endif

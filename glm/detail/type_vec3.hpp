@@ -101,10 +101,6 @@ namespace glm
 		GLM_FUNC_DECL GLM_CONSTEXPR T & operator[](length_type i);
 		GLM_FUNC_DECL GLM_CONSTEXPR T const& operator[](length_type i) const;
 
-		GLM_FUNC_DECL vec<3, T, Q> splatX() const;
-		GLM_FUNC_DECL vec<3, T, Q> splatY() const;
-		GLM_FUNC_DECL vec<3, T, Q> splatZ() const;
-
 		// -- Implicit basic constructors --
 
 		GLM_DEFAULTED_DEFAULT_CTOR_DECL GLM_CONSTEXPR vec() GLM_DEFAULT_CTOR;
@@ -260,6 +256,8 @@ namespace glm
 		template<typename U>
 		GLM_FUNC_DECL GLM_CONSTEXPR vec<3, T, Q> & operator>>=(vec<3, U, Q> const& v);
 	};
+
+
 
 	// -- Unary operators --
 

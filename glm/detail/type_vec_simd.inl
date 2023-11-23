@@ -1,9 +1,69 @@
 #pragma once
 
+#define CTORSL(L, CTOR)\
+CTOR(L, aligned_lowp)\
+CTOR(L, aligned_mediump)\
+CTOR(L, aligned_highp)\
+CTOR(L, unaligned_simd_lowp)\
+CTOR(L, unaligned_simd_mediump)\
+CTOR(L, unaligned_simd_highp)
+
+
+namespace glm {
+	namespace detail
+	{
+
+template<length_t L, typename T, qualifier Q, std::size_t Size>
+struct compute_vec_and<L, T, Q, -1, Size, true> : public compute_vec_and<L, T, Q, -1, Size, false>
+{};
+
+template<length_t L, typename T, qualifier Q, std::size_t Size>
+struct compute_vec_or<L, T, Q, -1, Size, true>: public compute_vec_or<L, T, Q, true, Size, false>
+{};
+
+template<length_t L, typename T, qualifier Q, std::size_t Size>
+struct compute_vec_shift_left<L, T, Q, -1, Size, true> : public compute_vec_shift_left<L, T, Q, true, Size, false>
+{};
+
+template<length_t L, typename T, qualifier Q, std::size_t Size>
+struct compute_vec_shift_right<L, T, Q, -1, Size, true> : public compute_vec_shift_right<L, T, Q, -1, Size, false>
+{};
+
+template<length_t L, typename T, qualifier Q, std::size_t Size>
+struct compute_vec_bitwise_not<L, T, Q, -1, Size, true>:public compute_vec_bitwise_not<L, T, Q, true, Size, false>
+{};
+
+template<length_t L, typename T, qualifier Q, int IsInt, std::size_t Size>
+struct compute_vec_equal<L, T, Q, IsInt, Size, true> : public compute_vec_equal<L, T, Q, IsInt, Size, false>
+{};
+
+template<length_t L, typename T, qualifier Q, int IsInt, std::size_t Size>
+struct compute_vec_nequal<L, T, Q, IsInt, Size, true> : public compute_vec_nequal<L, T, Q, IsInt, Size, false>
+{};
+
+template<length_t L, typename T, qualifier Q>
+struct compute_vec_mod<L, T, Q, true> : public compute_vec_mod<L, T, Q, false>
+{};
+
+
+template<typename T, length_t L, qualifier Q>
+struct compute_vec_add<L, T, Q, true> : public compute_vec_add<L, T, Q, false>
+{};
+
+template< length_t L, typename T,  qualifier Q>
+struct compute_vec_sub<L, T, Q, true> : public compute_vec_sub<L, T, Q, false>
+{};
+
+template< length_t L, typename T, qualifier Q>
+struct compute_vec_mul<L, T, Q, true> : public compute_vec_mul<L, T, Q, false>
+{};
+
+template< length_t L, typename T, qualifier Q>
+struct compute_vec_div<L, T, Q, true> : public compute_vec_div<L, T, Q, false>
+{};
+
 #if GLM_ARCH & GLM_ARCH_SSE2_BIT
-namespace glm{
-namespace detail
-{
+
 #	if GLM_CONFIG_SWIZZLE == GLM_SWIZZLE_OPERATOR
 	template<length_t L, qualifier Q, int E0, int E1, int E2, int E3>
 	struct _swizzle_base1<L, float, Q, E0,E1,E2,E3, true> : public _swizzle_base0<float, L>
@@ -55,95 +115,6 @@ namespace detail
 	};
 #	endif// GLM_CONFIG_SWIZZLE == GLM_SWIZZLE_OPERATOR
 
-	template<length_t L, qualifier Q>
-	struct compute_splat<L, float, Q, true> {
-		template<int c>
-		GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<L, float, Q> call(vec<L, float, Q> const& a)
-		{
-			vec<L, float, Q> Result;
-			const int s = _MM_SHUFFLE(c, c, c, c);
-			glm_f32vec4 va = (glm_f32vec4)a.data;
-#			if GLM_ARCH & GLM_ARCH_AVX_BIT
-			Result.data = _mm_permute_ps(va, s);
-#			else
-			Result.data = _mm_shuffle_ps(va, va, s);
-#			endif
-			return Result;
-		}
-	};
-
-	template<length_t L, qualifier Q>
-	struct compute_splat<L, double, Q, true> {
-		
-		template<bool, int c>
-		struct detail
-		{};
-
-		template<int c>
-		struct detail<true, c>
-		{
-			GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<L, double, Q> call(vec<L, double, Q> const& a)
-			{
-				vec<L, double, Q> Result;
-				glm_f64vec2 r0 = _mm_shuffle_pd((glm_f64vec2)a.data.getv(0), (glm_f64vec2)a.data.getv(0), c | c << 1);
-				Result.data.setv(0, r0);
-				Result.data.setv(1, r0);
-				return Result;
-			}
-		};
-
-		template<int c>
-		struct detail<false, c>
-		{
-			GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<L, double, Q> call(vec<L, double, Q> const& a)
-			{
-				vec<L, double, Q> Result;
-				const unsigned int d = (unsigned int)(c - 2);
-				glm_f64vec2 r0 = _mm_shuffle_pd((glm_f64vec2)a.data.getv(1), (glm_f64vec2)a.data.getv(1), d | d << 1);
-				Result.data.setv(0, r0);
-				Result.data.setv(1, r0);
-				return Result;
-			}
-		};
-
-		template<int c>
-		GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<L, double, Q> call(vec<L, double, Q> const& a)
-		{
-			//return compute_splat<L, double, Q, false>::call<c>(a);
-			vec<L, double, Q> Result;
-#			if GLM_ARCH & GLM_ARCH_AVX_BIT
-				Result.data = _mm256_permute4x64_pd((glm_f64vec4)a.data, _MM_SHUFFLE(c, c, c, c));
-#			else
-#if 1 //detail<(c <= 1), c>::call2(a) is equivalent to following code but without if constexpr usage
-			Result = detail<(c <= 1), c>::call(a);
-#else
-			if constexpr (c <= 1)
-			{
-				glm_f64vec2 r0 = _mm_shuffle_pd((glm_f64vec2)a.data.getv(0), (glm_f64vec2)a.data.getv(0), c | c << 1);
-				Result.data.setv(0, r0);
-				Result.data.setv(1, r0);
-			}
-			else
-			{
-				const unsigned int d = (unsigned int)(c - 2);
-				glm_f64vec2 r0 = _mm_shuffle_pd((glm_f64vec2)a.data.getv(1), (glm_f64vec2)a.data.getv(1), d | d << 1);
-				Result.data.setv(0, r0);
-				Result.data.setv(1, r0);
-			}
-#endif
-#			endif
-			return Result;
-		}
-	};
-
-	template<length_t L, typename T, qualifier Q>
-	struct compute_vec_add<L, T, Q, true>
-	{
-		static vec<L, int, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
-		{
-			return compute_vec_add<L, T, Q, false>::call(a, b);
-		}
-	};
 
 	template<length_t L, qualifier Q>
 	struct compute_vec_add<L, float, Q, true>
@@ -194,15 +165,6 @@ namespace detail
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q>
-	struct compute_vec_sub<L, T, Q, true>
-	{
-		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
-		{
-			return compute_vec_sub<L, T, Q, false>::call(a, b);
-		}
-	};
-
 	template<length_t L, qualifier Q>
 	struct compute_vec_sub<L, int, Q, true>
 	{
@@ -227,15 +189,6 @@ namespace detail
 			Result.data.setv(1,  _mm_sub_pd((glm_f64vec2)a.data.getv(1), (glm_f64vec2)b.data.getv(1)));
 #endif
 			return Result;
-		}
-	};
-
-	template<length_t L, typename T, qualifier Q>
-	struct compute_vec_mul<L, T, Q, true>
-	{
-		static vec<L, int, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
-		{
-			return compute_vec_mul<L, T, Q, false>::call(a, b);
 		}
 	};
 
@@ -302,7 +255,7 @@ namespace detail
 	{
 		GLM_FUNC_QUALIFIER static vec<L, int, Q> call(vec<L, int, Q> const& a, vec<L, int, Q> const& b)
 		{
-#if _MSC_VER >= 1920 || !defined(_MSC_VER) //_mm_div_epi32 only defined with VS >= 2019
+#if defined(_MSC_VER) && _MSC_VER >= 1920 //_mm_div_epi32 only defined with VS >= 2019
 			vec<L, int, Q> Result;
 			Result.data = _mm_div_epi32((glm_i32vec4)a.data, (glm_i32vec4)b.data);
 			return Result;
@@ -320,7 +273,7 @@ namespace detail
 
 		GLM_FUNC_QUALIFIER static vec<3, int, Q> call(vec<3, int, Q> const& a, vec<3, int, Q> const& b)
 		{
-#if _MSC_VER >= 1920 || !defined(_MSC_VER) //_mm_div_epi32 only defined with VS >= 2019
+#if _MSC_VER && _MSC_VER >= 1920 //_mm_div_epi32 only defined with VS >= 2019
 			vec<3, int, Q> Result;
 			glm_i32vec4 bv = (glm_i32vec4)b.data;
 			bv = _mm_shuffle_epi32(bv, _MM_SHUFFLE(0, 2, 1, 0));
@@ -360,15 +313,6 @@ namespace detail
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q, std::size_t Size>
-	struct compute_vec_and<L, T, Q, -1, Size, true>
-	{
-		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
-		{
-			return compute_vec_and<L, T, Q, -1, Size, false>::call(a, b);
-		}
-	};
-
 	template<length_t L, typename T, qualifier Q>
 	struct compute_vec_and<L, T, Q, -1, 32, true>
 	{
@@ -389,23 +333,17 @@ namespace detail
 			vec<L, T, Q> Result;
 #	if GLM_ARCH & GLM_ARCH_AVX2_BIT
 			Result.data = _mm256_and_si256((glm_i64vec4)a.data, (glm_i64vec4)b.data);
+#	elif GLM_ARCH & GLM_ARCH_AVX_BIT
+			Result.data = _mm256_and_pd(_mm256_castpd256_pd128(a.data), _mm256_castpd256_pd128(b.data));
 #	else
-			Result.data.setv(0,  _mm_and_si128((glm_i64vec2)a.data.getv(0), (glm_i64vec4)b.data.getv(0)));
-			Result.data.setv(1,  _mm_and_si128((glm_i64vec4)a.data.getv(1), (glm_i64vec4)b.data.getv(1)));
+			Result.data.setv(0,  _mm_and_si128((glm_i64vec2)a.data.getv(0), (glm_i64vec2)b.data.getv(0)));
+			Result.data.setv(1,  _mm_and_si128((glm_i64vec2)a.data.getv(1), (glm_i64vec2)b.data.getv(1)));
 #	endif
 			return Result;
 		}
 	};
 
 
-	template<length_t L, typename T, qualifier Q, std::size_t Size>
-	struct compute_vec_or<L, T, Q, -1, Size, true>
-	{
-		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
-		{
-			return compute_vec_or<L, T, Q, true, Size, false>::call(a, b);
-		}
-	};
 
 	template<length_t L, typename T, qualifier Q>
 	struct compute_vec_or<L, T, Q, -1, 32, true>
@@ -464,15 +402,6 @@ namespace detail
 	};
 
 
-	template<length_t L, typename T, qualifier Q, std::size_t Size>
-	struct compute_vec_shift_left<L, T, Q, -1, Size, true>
-	{
-		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
-		{
-			return compute_vec_shift_left<L, T, Q, true, Size, false>::call(a, b);
-		}
-	};
-
 	//template<typename T, qualifier Q>
 	//struct compute_vec_shift_left<3, T, Q, -1, 32, true>
 	//{
@@ -516,14 +445,6 @@ namespace detail
 //		}
 //	};
 
-	template<length_t L, typename T, qualifier Q, std::size_t Size>
-	struct compute_vec_shift_right<L, T, Q, -1, Size, true>
-	{
-		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
-		{
-			return compute_vec_shift_right<L, T, Q, -1, Size, false>::call(a, b);
-		}
-	};
 
 //	template<length_t L, typename T, qualifier Q>
 //	struct compute_vec_shift_right<L, T, Q, -1, 32, true>
@@ -552,16 +473,6 @@ namespace detail
 //		}
 //	};
 
-
-	template<length_t L, typename T, qualifier Q, std::size_t Size>
-	struct compute_vec_bitwise_not<L, T, Q, -1, Size, true>
-	{
-		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& v1)
-		{
-			return compute_vec_bitwise_not<L, T, Q, true, Size, false>::call(v1);
-		}
-	};
-
 	template<length_t L, typename T, qualifier Q>
 	struct compute_vec_bitwise_not<L, T, Q, true, 32, true>
 	{
@@ -581,10 +492,10 @@ namespace detail
 		{
 			vec<L, T, Q> Result;
 #	if GLM_ARCH & GLM_ARCH_AVX2_BIT
-			Result.data = _mm256_xor_si256((glm_i64vec4)v.data, _mm_set1_epi32(-1));
+			Result.data = _mm256_xor_si256((glm_i64vec4)v.data, _mm256_set1_epi32(-1));
 #	else
-			Result.data.setv(0,  _mm_xor_si128((glm_i64vec2)a.data.getv(0), _mm_set1_epi32(-1)));
-			Result.data.setv(1,  _mm_xor_si128((glm_i64vec2)a.data.getv(1), _mm_set1_epi32(-1)));
+			Result.data.setv(0,  _mm_xor_si128((glm_i64vec2)v.data.getv(0), _mm_set1_epi32(-1)));
+			Result.data.setv(1,  _mm_xor_si128((glm_i64vec2)v.data.getv(1), _mm_set1_epi32(-1)));
 #	endif
 			return Result;
 		}
@@ -600,15 +511,6 @@ namespace detail
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q, std::size_t Size>
-	struct compute_vec_equal<L, T, Q, -1, Size, true>
-	{
-		GLM_FUNC_QUALIFIER static bool call(vec<L, T, Q> const& v1, vec<L, T, Q> const& v2)
-		{
-			return compute_vec_equal<L, T, Q, true, Size, false>::call(v1, v2);
-		}
-	};
-
 #	if GLM_ARCH & GLM_ARCH_SSE41_BIT
 	template<length_t L, qualifier Q>
 	struct compute_vec_equal<L, int, Q, true, 32, true>
@@ -616,20 +518,13 @@ namespace detail
 		GLM_FUNC_QUALIFIER static bool call(vec<L, int, Q> const& v1, vec<L, int, Q> const& v2)
 		{
 			//return _mm_movemask_epi8(_mm_cmpeq_epi32(v1.data, v2.data)) != 0;
-			__m128i neq = _mm_xor_si128((glm_i32vec4)v1.data, (glm_f32vec4)v2.data);
+			__m128i neq = _mm_xor_si128((glm_i32vec4)v1.data, (glm_i32vec4)v2.data);
 			return _mm_test_all_zeros(neq, neq) == 0;
 		}
 	};
 #	endif
 
-	template<length_t L, qualifier Q>
-	struct compute_vec_equal<L, bool, Q, 0, 8, true>
-	{
-		GLM_FUNC_QUALIFIER static bool call(vec<L, bool, Q> const& v1, vec<L, bool, Q> const& v2)
-		{
-			return compute_vec_equal<L, bool, Q, 0, 8, false>::call(v1, v2);
-		}
-	};
+
 
 	template<length_t L, qualifier Q>
 	struct compute_vec_nequal<L, float, Q, false, 32, true>
@@ -663,14 +558,7 @@ namespace detail
 		}
 	};
 #	else
-	template<length_t L, qualifier Q>
-	struct compute_vec_nequal<L, int, Q, -1, 32, true>
-	{
-		GLM_FUNC_QUALIFIER static bool call(vec<L, int, Q> const& v1, vec<L, int, Q> const& v2)
-		{
-			return compute_vec_nequal<L, int, Q, true, 32, false>::call(v1, v2);
-		}
-	};
+
 
 	template<length_t L, qualifier Q>
 	struct compute_vec_nequal<L, unsigned int, Q, -1, 32, true>
@@ -683,37 +571,15 @@ namespace detail
 
 #	endif
 
-	template<length_t L, qualifier Q>
-	struct compute_vec_nequal<L, bool, Q, 0, 8, true>
-	{
-		GLM_FUNC_QUALIFIER static bool call(vec<L, bool, Q> const& v1, vec<L, bool, Q> const& v2)
-		{
-			return compute_vec_nequal<L, bool, Q, 0, 8, false>::call(v1, v2);
-		}
-	};
 
-	template<length_t L, typename T, qualifier Q>
-	struct compute_vec_mod<L, T, Q, true>
-	{
-		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
-		{
-			return compute_vec_mod<L, T, Q, false>::call(a, b);
-		}
-	};
+
 
 }//namespace detail
 
-#define CTORSL(L, CTOR)\
-CTOR(L, aligned_lowp)\
-CTOR(L, aligned_mediump)\
-CTOR(L, aligned_highp)\
-CTOR(L, unaligned_simd_lowp)\
-CTOR(L, unaligned_simd_mediump)\
-CTOR(L, unaligned_simd_highp)
-
 
 #define CTOR_FLOAT(L, Q)\
-GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<L, float, Q>::vec(float _s) :\
+	template<>\
+	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<L, float, Q>::vec(float _s) :\
 	data(_mm_set1_ps(_s))\
 	{}
 
@@ -721,8 +587,7 @@ GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<L, float, Q>::vec(float _s) :\
 #	define CTOR_DOUBLE(L, Q)\
 	template<>\
 	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<L, double, Q>::vec(double _s) :\
-		data(_mm256_set1_pd(_s))\
-		{}
+		data(_mm256_set1_pd(_s)){}
 
 #define CTOR_DOUBLE4(L, Q)\
 	template<>\
@@ -738,7 +603,7 @@ GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<L, float, Q>::vec(float _s) :\
 	template<>\
 	template<qualifier P>\
 	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, double, Q>::vec(vec<3, double, P> const& v) :\
-		data(_mm256_setr_pd(v.x, v.y, v.z, v.z))
+		data(_mm256_setr_pd(v.x, v.y, v.z, v.z)){}
 
 #else
 #	define CTOR_DOUBLE(L, Q)\
@@ -835,13 +700,26 @@ GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<L, float, Q>::vec(float _s) :\
 #endif//GLM_ARCH & GLM_ARCH_SSE2_BIT
 
 #if GLM_ARCH & GLM_ARCH_NEON_BIT
-namespace glm {
-namespace detail {
 
-	template<length_t L, typename T, qualifier Q>
+#if GLM_CONFIG_SWIZZLE == GLM_SWIZZLE_OPERATOR
+// the functions below needs to be properly implemented, use unoptimized function fro now.
+
+template<length_t L, qualifier Q, int E0, int E1, int E2, int E3>
+struct _swizzle_base1<L, float, Q, E0, E1, E2, E3, true> : public _swizzle_base1<L, float, Q, E0, E1, E2, E3, false>{}; 
+
+template<length_t L, qualifier Q, int E0, int E1, int E2, int E3>
+struct _swizzle_base1<L, int, Q, E0, E1, E2, E3, true> : public _swizzle_base1<L, int, Q, E0, E1, E2, E3, false> {};
+
+template<length_t L, qualifier Q, int E0, int E1, int E2, int E3>
+struct _swizzle_base1<L, uint, Q, E0, E1, E2, E3, true> : public _swizzle_base1<L, uint, Q, E0, E1, E2, E3, false> {};
+
+#	endif// GLM_CONFIG_SWIZZLE == GLM_SWIZZLE_OPERATOR
+
+
+	template<length_t L, qualifier Q>
 	struct compute_vec_add<L, float, Q, true>
 	{
-		static
+		GLM_FUNC_QUALIFIER static
 		vec<L, float, Q>
 		call(vec<L, float, Q> const& a, vec<L, float, Q> const& b)
 		{
@@ -851,10 +729,10 @@ namespace detail {
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q>
+	template<length_t L, qualifier Q>
 	struct compute_vec_add<L, uint, Q, true>
 	{
-		static
+		GLM_FUNC_QUALIFIER static
 		vec<L, uint, Q>
 		call(vec<L, uint, Q> const& a, vec<L, uint, Q> const& b)
 		{
@@ -864,7 +742,7 @@ namespace detail {
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q>
+	template<length_t L, qualifier Q>
 	struct compute_vec_add<L, int, Q, true>
 	{
 		static
@@ -877,7 +755,7 @@ namespace detail {
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q>
+	template<length_t L, qualifier Q>
 	struct compute_vec_sub<L, float, Q, true>
 	{
 		static vec<L, float, Q> call(vec<L, float, Q> const& a, vec<L, float, Q> const& b)
@@ -888,7 +766,7 @@ namespace detail {
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q>
+	template<length_t L, qualifier Q>
 	struct compute_vec_sub<L, uint, Q, true>
 	{
 		static vec<L, uint, Q> call(vec<L, uint, Q> const& a, vec<L, uint, Q> const& b)
@@ -899,7 +777,7 @@ namespace detail {
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q>
+	template<length_t L, qualifier Q>
 	struct compute_vec_sub<L, int, Q, true>
 	{
 		static vec<L, int, Q> call(vec<L, int, Q> const& a, vec<L, int, Q> const& b)
@@ -910,8 +788,8 @@ namespace detail {
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q>
-	struct compute_vec_mul<float, Q, true>
+	template<length_t L, qualifier Q>
+	struct compute_vec_mul<L, float, Q, true>
 	{
 		static vec<L, float, Q> call(vec<L, float, Q> const& a, vec<L, float, Q> const& b)
 		{
@@ -921,8 +799,8 @@ namespace detail {
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q>
-	struct compute_vec_mul<uint, Q, true>
+	template<length_t L, qualifier Q>
+	struct compute_vec_mul<L, uint, Q, true>
 	{
 		static vec<L, uint, Q> call(vec<L, uint, Q> const& a, vec<L, uint, Q> const& b)
 		{
@@ -932,8 +810,8 @@ namespace detail {
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q>
-	struct compute_vec_mul<int, Q, true>
+	template<length_t L, qualifier Q>
+	struct compute_vec_mul<L, int, Q, true>
 	{
 		static vec<L, int, Q> call(vec<L, int, Q> const& a, vec<L, int, Q> const& b)
 		{
@@ -943,8 +821,8 @@ namespace detail {
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q>
-	struct compute_vec_div<float, Q, true>
+	template<length_t L, qualifier Q>
+	struct compute_vec_div<L, float, Q, true>
 	{
 		static vec<L, float, Q> call(vec<L, float, Q> const& a, vec<L, float, Q> const& b)
 		{
@@ -967,8 +845,8 @@ namespace detail {
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q>
-	struct compute_vec_equal<float, Q, false, 32, true>
+	template<length_t L, qualifier Q>
+	struct compute_vec_equal<L, float, Q, false, 32, true>
 	{
 		static bool call(vec<L, float, Q> const& v1, vec<L, float, Q> const& v2)
 		{
@@ -986,8 +864,8 @@ namespace detail {
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q>
-	struct compute_vec_equal<uint, Q, false, 32, true>
+	template<length_t L, qualifier Q>
+	struct compute_vec_equal<L, uint, Q, false, 32, true>
 	{
 		static bool call(vec<L, uint, Q> const& v1, vec<L, uint, Q> const& v2)
 		{
@@ -1005,8 +883,8 @@ namespace detail {
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q>
-	struct compute_vec_equal<int, Q, false, 32, true>
+	template<length_t L, qualifier Q>
+	struct compute_vec_equal<L, int, Q, false, 32, true>
 	{
 		static bool call(vec<L, int, Q> const& v1, vec<L, int, Q> const& v2)
 		{
@@ -1024,8 +902,8 @@ namespace detail {
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q>
-	struct compute_vec_nequal<float, Q, false, 32, true>
+	template<length_t L, qualifier Q>
+	struct compute_vec_nequal<L, float, Q, false, 32, true>
 	{
 		static bool call(vec<L, float, Q> const& v1, vec<L, float, Q> const& v2)
 		{
@@ -1033,8 +911,8 @@ namespace detail {
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q>
-	struct compute_vec_nequal<uint, Q, false, 32, true>
+	template<length_t L, qualifier Q>
+	struct compute_vec_nequal<L, uint, Q, false, 32, true>
 	{
 		static bool call(vec<L, uint, Q> const& v1, vec<L, uint, Q> const& v2)
 		{
@@ -1043,13 +921,95 @@ namespace detail {
 	};
 
 	template<length_t L, qualifier Q>
-	struct compute_vec_nequal<int, Q, false, 32, true>
+	struct compute_vec_nequal<L, int, Q, false, 32, true>
 	{
 		static bool call(vec<L, int, Q> const& v1, vec<L, int, Q> const& v2)
 		{
 			return !compute_vec_equal<int, Q, false, 32, true>::call(v1, v2);
 		}
 	};
+
+
+#if !GLM_CONFIG_XYZW_ONLY
+
+#define CTOR_FLOAT(L, Q)\
+	template<>\
+	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<L, float, Q>::vec(float _s) :\
+		data(vdupq_n_f32(_s))\
+	{}
+
+#define CTOR_INT(L, Q)\
+	template<>\
+	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<L, int, Q>::vec(int _s) :\
+		data(vdupq_n_s32(_s))\
+	{}
+
+#define CTOR_UINT(L, Q)\
+	template<>\
+	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<L, uint, Q>::vec(uint _s) :\
+		data(vdupq_n_u32(_s))\
+	{}
+
+#define CTOR_VECF_INT4(L, Q)\
+	template<>\
+	template<>\
+	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<L, float, Q>::vec(int _x, int _y, int _z, int _w) :\
+		data(vcvtq_f32_s32(vec<L, int, Q>(_x, _y, _z, _w).data))\
+	{}
+
+#define CTOR_VECF_UINT4(L, Q)\
+	template<>\
+	template<>\
+	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<L, float, Q>::vec(uint _x, uint _y, uint _z, uint _w) :\
+		data(vcvtq_f32_u32(vec<L, uint, Q>(_x, _y, _z, _w).data))\
+	{}
+
+#define CTOR_VECF_INT3(L, Q)\
+	template<>\
+	template<>\
+	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<L, float, Q>::vec(int _x, int _y, int _z) :\
+		data(vcvtq_f32_s32(vec<L, int, Q>(_x, _y, _z).data))\
+	{}
+
+#define CTOR_VECF_UINT4(L, Q)\
+	template<>\
+	template<>\
+	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<L, float, Q>::vec(uint _x, uint _y, uint _z, uint _w) :\
+		data(vcvtq_f32_u32(vec<L, uint, Q>(_x, _y, _z, _w).data))\
+	{}
+
+#define CTOR_VECF_UINT3(L, Q)\
+	template<>\
+	template<>\
+	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<L, float, Q>::vec(uint _x, uint _y, uint _z) :\
+		data(vcvtq_f32_u32(vec<L, uint, Q>(_x, _y, _z).data))\
+	{}
+
+
+#define CTOR_VECF_VECF(L, Q)\
+	template<>\
+	template<>\
+	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<L, float, Q>::vec(const vec<L, float, Q>& rhs) :\
+		data(rhs.data)\
+	{}
+
+#define CTOR_VECF_VECI(L, Q)\
+	template<>\
+	template<>\
+	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<L, float, Q>::vec(const vec<L, int, Q>& rhs) :\
+		data(vcvtq_f32_s32(rhs.data))\
+	{}
+
+#define CTOR_VECF_VECU(L, Q)\
+	template<>\
+	template<>\
+	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<L, float, Q>::vec(const vec<L, uint, Q>& rhs) :\
+		data(vcvtq_f32_u32(rhs.data))\
+	{}
+
+
+#endif
+
 
 }//namespace detail
 

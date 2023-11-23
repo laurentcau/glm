@@ -15,7 +15,6 @@
 #include <cstdio>
 
 template <typename matType, typename vecType>
-__declspec(noinline)
 static void test_vec_mul_mat(matType const& M, std::vector<vecType> const& I, std::vector<vecType>& O)
 {
 	for (std::size_t i = 0, n = I.size(); i < n; ++i)

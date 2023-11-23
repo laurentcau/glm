@@ -318,29 +318,69 @@ namespace detail
 		}
 	};
 
+	template<typename T, qualifier Q, bool use_simd>
+	struct inv3x3 {};
+
+	template<typename T, qualifier Q>
+	struct inv3x3<T, Q, true>
+	{
+		GLM_FUNC_QUALIFIER static mat<3, 3, T, Q> call(mat<3, 3, T, Q> const& m)
+		{
+			// see: https://www.onlinemathstutor.org/post/3x3_inverses
+
+			vec<4, T, qualifier(to_aligned<Q>::value)> a = toVec4W0(m[0]);
+			vec<4, T, qualifier(to_aligned<Q>::value)> b = toVec4W0(m[1]);
+			vec<4, T, qualifier(to_aligned<Q>::value)> c = toVec4W0(m[2]);
+
+			T Determinant = compute_dot<vec<4, T, qualifier(to_aligned<Q>::value)>, T, true>::call(a, compute_cross<T, qualifier(to_aligned<Q>::value), true>::call(b, c));
+			T OneOverDeterminant = static_cast<T>(1) / Determinant;
+			vec<4, T, qualifier(to_aligned<Q>::value)> i0 = compute_cross<T, qualifier(to_aligned<Q>::value), true>::call(b, c);
+			vec<4, T, qualifier(to_aligned<Q>::value)> i1 = compute_cross<T, qualifier(to_aligned<Q>::value), true>::call(c, a);
+			vec<4, T, qualifier(to_aligned<Q>::value)> i2 = compute_cross<T, qualifier(to_aligned<Q>::value), true>::call(a, b);
+
+			mat<3, 3, T, Q> Inverse;
+			Inverse[0] = toVec3(i0);
+			Inverse[1] = toVec3(i1);
+			Inverse[2] = toVec3(i2);
+
+			Inverse = transpose(Inverse);
+			Inverse *= OneOverDeterminant;
+			return Inverse;
+		}
+	};
+
+	template<typename T, qualifier Q>
+	struct inv3x3<T, Q, false>
+	{
+		GLM_FUNC_QUALIFIER static mat<3, 3, T, Q> call(mat<3, 3, T, Q> const& m)
+		{
+			T OneOverDeterminant = static_cast<T>(1) / (
+				+m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2])
+				- m[1][0] * (m[0][1] * m[2][2] - m[2][1] * m[0][2])
+				+ m[2][0] * (m[0][1] * m[1][2] - m[1][1] * m[0][2]));
+
+			mat<3, 3, T, Q> Inverse;
+			Inverse[0][0] = +(m[1][1] * m[2][2] - m[2][1] * m[1][2]);
+			Inverse[1][0] = -(m[1][0] * m[2][2] - m[2][0] * m[1][2]);
+			Inverse[2][0] = +(m[1][0] * m[2][1] - m[2][0] * m[1][1]);
+			Inverse[0][1] = -(m[0][1] * m[2][2] - m[2][1] * m[0][2]);
+			Inverse[1][1] = +(m[0][0] * m[2][2] - m[2][0] * m[0][2]);
+			Inverse[2][1] = -(m[0][0] * m[2][1] - m[2][0] * m[0][1]);
+			Inverse[0][2] = +(m[0][1] * m[1][2] - m[1][1] * m[0][2]);
+			Inverse[1][2] = -(m[0][0] * m[1][2] - m[1][0] * m[0][2]);
+			Inverse[2][2] = +(m[0][0] * m[1][1] - m[1][0] * m[0][1]);
+
+			Inverse *= OneOverDeterminant;
+			return Inverse;
+		}
+	};
+
 	template<typename T, qualifier Q, bool Aligned>
 	struct compute_inverse<3, 3, T, Q, Aligned>
 	{
 		GLM_FUNC_QUALIFIER static mat<3, 3, T, Q> call(mat<3, 3, T, Q> const& m)
 		{
-			T OneOverDeterminant = static_cast<T>(1) / (
-				+ m[0][0] * (m[1][1] * m[2][2] - m[2][1] * m[1][2])
-				- m[1][0] * (m[0][1] * m[2][2] - m[2][1] * m[0][2])
-				+ m[2][0] * (m[0][1] * m[1][2] - m[1][1] * m[0][2]));
-
-			mat<3, 3, T, Q> Inverse;
-			Inverse[0][0] = + (m[1][1] * m[2][2] - m[2][1] * m[1][2]);
-			Inverse[1][0] = - (m[1][0] * m[2][2] - m[2][0] * m[1][2]);
-			Inverse[2][0] = + (m[1][0] * m[2][1] - m[2][0] * m[1][1]);
-			Inverse[0][1] = - (m[0][1] * m[2][2] - m[2][1] * m[0][2]);
-			Inverse[1][1] = + (m[0][0] * m[2][2] - m[2][0] * m[0][2]);
-			Inverse[2][1] = - (m[0][0] * m[2][1] - m[2][0] * m[0][1]);
-			Inverse[0][2] = + (m[0][1] * m[1][2] - m[1][1] * m[0][2]);
-			Inverse[1][2] = - (m[0][0] * m[1][2] - m[1][0] * m[0][2]);
-			Inverse[2][2] = + (m[0][0] * m[1][1] - m[1][0] * m[0][1]);
-
-			Inverse *= OneOverDeterminant;
-			return Inverse;
+			return detail::inv3x3<T, Q, detail::use_simd<Q>::value>::call(m);
 		}
 	};
 

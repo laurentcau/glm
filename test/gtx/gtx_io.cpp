@@ -25,6 +25,12 @@ namespace
 				case glm::aligned_mediump:	os << "amd"; break;
 				case glm::aligned_lowp:		os << "alo"; break;
 #			endif
+#		if GLM_CONFIG_SIMD == GLM_ENABLE
+				case glm::unaligned_simd_highp: os << "ushi"; break;
+				case glm::unaligned_simd_mediump: os << "usmd"; break;
+				case glm::unaligned_simd_lowp: os << "uslo"; break;
+#		endif
+
 			}
 		}
 

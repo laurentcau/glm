@@ -81,6 +81,17 @@ namespace detail
 				x.z * y.x - y.z * x.x,
 				x.x * y.y - y.x * x.y);
 		}
+
+		GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<4, T, Q> call(vec<4, T, Q> const& x, vec<4, T, Q> const& y)
+		{
+			GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'cross' accepts only floating-point inputs");
+
+			return vec<4, T, Q>(
+				x.y * y.z - y.y * x.z,
+				x.z * y.x - y.z * x.x,
+				x.x * y.y - y.x * x.y,
+				0.0f);
+		}
 	};
 
 	template<length_t L, typename T, qualifier Q, bool Aligned>

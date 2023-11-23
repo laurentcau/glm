@@ -121,7 +121,7 @@ int main()
 
 	std::printf("glm::inverse(mat2):\n");
 	Error += comp_mat2_inverse<glm::packed_mat2, glm::aligned_mat2>(Samples);
-	
+
 	std::printf("glm::inverse(dmat2):\n");
 	Error += comp_mat2_inverse<glm::packed_dmat2, glm::aligned_dmat2>(Samples);
 
