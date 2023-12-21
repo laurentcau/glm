@@ -121,21 +121,21 @@ int main()
 
 	std::printf("glm::transpose(mat2):\n");
 	Error += comp_mat2_transpose<glm::mat2, glm::aligned_mat2>(Samples);
-	
+
 	std::printf("glm::transpose(dmat2):\n");
 	Error += comp_mat2_transpose<glm::dmat2, glm::aligned_dmat2>(Samples);
 
 	std::printf("glm::transpose(mat3):\n");
-	Error += comp_mat3_transpose<glm::mat3, glm::aligned_mat3>(Samples);
-	
+	Error += comp_mat3_transpose<glm::packed_mat3, glm::aligned_mat3>(Samples);
+
 	std::printf("glm::transpose(dmat3):\n");
-	Error += comp_mat3_transpose<glm::dmat3, glm::aligned_dmat3>(Samples);
+	Error += comp_mat3_transpose<glm::packed_dmat3, glm::aligned_dmat3>(Samples);
 
 	std::printf("glm::transpose(mat4):\n");
-	Error += comp_mat4_transpose<glm::mat4, glm::aligned_mat4>(Samples);
+	Error += comp_mat4_transpose<glm::packed_mat4, glm::aligned_mat4>(Samples);
 	
 	std::printf("glm::transpose(dmat4):\n");
-	Error += comp_mat4_transpose<glm::dmat4, glm::aligned_dmat4>(Samples);
+	Error += comp_mat4_transpose<glm::packed_dmat4, glm::aligned_dmat4>(Samples);
 
 	return Error;
 }

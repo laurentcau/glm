@@ -27,7 +27,7 @@ namespace glm
 	{
 		assert(index >= 0 && index < m[0].length());
 
-		typename genType::row_type Result(0);
+		typename genType::row_type Result(genType::row_type::value_type(0));
 		for(length_t i = 0; i < m.length(); ++i)
 			Result[i] = m[i][index];
 		return Result;

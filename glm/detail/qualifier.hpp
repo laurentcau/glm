@@ -11,12 +11,6 @@ namespace glm
 		packed_mediump, ///< Typed data is tightly packed in memory  and operations are executed with medium precision in term of ULPs for higher performance
 		packed_lowp, ///< Typed data is tightly packed in memory  and operations are executed with low precision in term of ULPs to maximize performance
 
-#		if GLM_CONFIG_SIMD == GLM_ENABLE
-			unaligned_simd_highp, ///< Typed data is unaligned SIMD optimizations and operations are executed with high precision in term of ULPs
-			unaligned_simd_mediump, ///< Typed data is unaligned SIMD optimizations and operations are executed with high precision in term of ULPs for higher performance
-			unaligned_simd_lowp, // ///< Typed data is unaligned SIMD optimizations and operations are executed with high precision in term of ULPs to maximize performance
-#		endif
-
 #		if GLM_CONFIG_ALIGNED_GENTYPES == GLM_ENABLE
 			aligned_highp, ///< Typed data is aligned in memory allowing SIMD optimizations and operations are executed with high precision in term of ULPs
 			aligned_mediump, ///< Typed data is aligned in memory allowing SIMD optimizations and operations are executed with high precision in term of ULPs for higher performance
@@ -28,10 +22,6 @@ namespace glm
 		lowp = packed_lowp, ///< By default lowp qualifier is also packed
 		packed = packed_highp, ///< By default packed qualifier is also high precision
 
-#		if GLM_CONFIG_SIMD == GLM_ENABLE
-			unaligned_simd = unaligned_simd_highp, ///< By default unaligned_simd qualifier is also high precision
-#		endif
-
 #		if GLM_CONFIG_ALIGNED_GENTYPES == GLM_ENABLE
 			aligned = aligned_highp, ///< By default aligned qualifier is also high precision
 #		endif
@@ -39,11 +29,7 @@ namespace glm
 #		if GLM_CONFIG_ALIGNED_GENTYPES == GLM_ENABLE && defined(GLM_FORCE_DEFAULT_ALIGNED_GENTYPES)
 			defaultp = aligned_highp
 #		else
-#			if GLM_CONFIG_SIMD == GLM_ENABLE
-				defaultp = unaligned_simd_highp
-#			else
-				defaultp = highp
-#			endif
+			defaultp = highp
 #		endif
 		
 	};
@@ -99,51 +85,33 @@ namespace detail
 		};
 #	endif
 
-		template<glm::qualifier P>
-		struct use_simd
-		{
-			static const bool value = false;
-		};
+
+		// convert unaligned simd type to aligned simd type
+		template<qualifier Q>
+		struct to_aligned {};
 
 #if GLM_CONFIG_SIMD == GLM_ENABLE
 		template<>
-		struct use_simd<glm::unaligned_simd_lowp>
+		struct to_aligned<aligned_highp>
 		{
-			static const bool value = true;
+			enum { value = aligned_highp };
 		};
 
 		template<>
-		struct use_simd<glm::unaligned_simd_mediump>
+		struct to_aligned<aligned_lowp>
 		{
-			static const bool value = true;
+			enum { value = aligned_lowp };
 		};
 
 		template<>
-		struct use_simd<glm::unaligned_simd_highp>
+		struct to_aligned<aligned_mediump>
 		{
-			static const bool value = true;
+			enum { value = aligned_mediump };
 		};
 
-		template<>
-		struct use_simd<glm::aligned_lowp>
-		{
-			static const bool value = true;
-		};
-
-		template<>
-		struct use_simd<glm::aligned_mediump>
-		{
-			static const bool value = true;
-		};
-
-		template<>
-		struct use_simd<glm::aligned_highp>
-		{
-			static const bool value = true;
-		};
 #endif
 
-	template<length_t L, typename T, bool is_aligned, bool use_simd = true>
+	template<length_t L, typename T, bool is_aligned>
 	struct storage
 	{
 		typedef struct type {
@@ -177,33 +145,9 @@ namespace detail
 	};
 
 	template<>
-	struct storage<4, float, false, true>
-	{
-		typedef struct type{
-			float data[4];
-			GLM_DEFAULTED_DEFAULT_CTOR_QUALIFIER GLM_CONSTEXPR type() GLM_DEFAULT;
-			inline type(glm_f32vec4 v){_mm_storeu_ps(data, v);}
-			inline operator glm_f32vec4() const {return _mm_loadu_ps(data);}
-		} type;
-	};
-
-
-	template<>
 	struct storage<4, int, true>
 	{
 		typedef glm_i32vec4 type;
-	};
-
-	template<>
-	struct storage<4, int, false, true>
-	{
-		struct type
-		{
-			int data[4];
-			GLM_DEFAULTED_DEFAULT_CTOR_QUALIFIER GLM_CONSTEXPR type() GLM_DEFAULT;
-			type(glm_i32vec4 v) { _mm_storeu_si128((__m128i*)data, v); }
-			operator glm_i32vec4() const { return _mm_loadu_si128((__m128i*)data); }
-		};
 	};
 
 	template<>
@@ -213,15 +157,21 @@ namespace detail
 	};
 
 	template<>
-	struct storage<4, unsigned int, false, true>
+	struct storage<3, float, true>
 	{
-		struct type
-		{
-			unsigned int data[4];
-			GLM_DEFAULTED_DEFAULT_CTOR_QUALIFIER GLM_CONSTEXPR type() GLM_DEFAULT;
-			type(glm_i32vec4 v) { _mm_storeu_si128((__m128i*)data, v); }
-			operator glm_i32vec4() const { return _mm_loadu_si128((__m128i*)data); }
-		};
+		typedef glm_f32vec4 type;
+	};
+
+	template<>
+	struct storage<3, int, true>
+	{
+		typedef glm_i32vec4 type;
+	};
+
+	template<>
+	struct storage<3, unsigned int, true>
+	{
+		typedef glm_i32vec4 type;
 	};
 
 	template<>
@@ -230,6 +180,7 @@ namespace detail
 		typedef glm_f64vec2 type;
 	};
 
+/*
 	template<>
 	struct storage<2, double, false, true>
 	{
@@ -241,6 +192,7 @@ namespace detail
 			operator glm_f64vec2() const { return _mm_loadu_pd(data); }
 		};
 	};
+*/
 
 	template<>
 	struct storage<2, detail::int64, true>
@@ -253,13 +205,75 @@ namespace detail
 	{
 		typedef glm_u64vec2 type;
 	};
-#	endif
-#	if (GLM_ARCH & GLM_ARCH_AVX_BIT)
+
+
+	template<>
+	struct storage<3, detail::uint64, true>
+	{
+		typedef glm_u64vec2 type;
+	};
+
 	template<>
 	struct storage<4, double, true>
 	{
+#	if (GLM_ARCH & GLM_ARCH_AVX_BIT)
 		typedef glm_f64vec4 type;
+#	else
+		struct type
+		{
+			glm_f64vec2 data[2];
+			GLM_CONSTEXPR glm_f64vec2 getv(int i) const {
+				return data[i];
+			}
+			GLM_CONSTEXPR void setv(int i, const glm_f64vec2& v) {
+				data[i] = v;
+			}
+		};
+#	endif
 	};
+
+
+	template<>
+	struct storage<3, double, true> : public storage<4, double, true>
+	{};
+
+/*
+	template<>
+	struct storage<3, double, false, true>
+	{
+		struct type
+		{
+			double data[3];
+			GLM_DEFAULTED_DEFAULT_CTOR_QUALIFIER GLM_CONSTEXPR type() GLM_DEFAULT;
+#	if (GLM_ARCH & GLM_ARCH_AVX_BIT)
+			GLM_FUNC_QUALIFIER type(glm_f64vec4 v) {
+				__m256d T1 = _mm256_permute_pd(v, 1);
+				_mm_store_sd(&data[0], _mm256_castpd256_pd128(v));
+				_mm_store_sd(&data[1], _mm256_castpd256_pd128(T1));
+				_mm_store_sd(&data[2], _mm256_extractf128_pd(v, 1));
+			}
+			GLM_FUNC_QUALIFIER operator glm_f64vec4() const {
+				return _mm256_set_pd(data[2], data[2], data[1], data[0]);
+			}
+#	else
+			GLM_CONSTEXPR glm_f64vec2 getv(int i) const {
+				if (i == 0) 
+					return _mm_loadu_pd(data); 
+				else
+					return _mm_load_sd(&data[2]);
+			}
+			GLM_CONSTEXPR void setv(int i, const glm_f64vec2 &v)
+			{
+				if (i == 0)
+					_mm_storeu_pd(data, v);
+				else
+					_mm_store_sd(&data[2], v);
+			}
+#endif
+		};
+
+	};
+	*/
 #	endif
 
 #	if (GLM_ARCH & GLM_ARCH_AVX2_BIT)
@@ -282,7 +296,7 @@ namespace detail
 	{
 		typedef glm_f32vec4 type;
 	};
-
+/*
 	template<>
 	struct storage<4, float, false, true>
 	{
@@ -293,16 +307,36 @@ namespace detail
 			inline operator glm_f32vec4() const { return vld1q_f32(reinterpret_cast<const float*>(data)); }
 		} type;
 	};
-
-
-	return ;
-
+*/
 	template<>
-	struct storage<4, int, true>
+	struct storage<3, float, true> : public storage<4, float, true>
+	{};
+/*
+	template<>
+	struct storage<3, float, false, true>
+	{
+		typedef struct type {
+			float data[3];
+			GLM_DEFAULTED_DEFAULT_CTOR_QUALIFIER GLM_CONSTEXPR type() GLM_DEFAULT;
+			inline type(glm_f32vec4 v) { 
+				data[0] = vgetq_lane_f32(v, 0);
+				data[1] = vgetq_lane_f32(v, 1);
+				data[2] = vgetq_lane_f32(v, 2);
+			}
+			inline operator glm_f32vec4() const { 
+				const float init[4] = {data[2],data[2],data[1],data[0]};
+				return vld1q_f32(init);
+			}
+		} type;
+
+	};
+*/
+	template<>
+	struct storage<4, int, true, true>
 	{
 		typedef glm_i32vec4 type;
 	};
-
+/*
 	template<>
 	struct storage<4, int, false, true>
 	{
@@ -310,17 +344,40 @@ namespace detail
 		{
 			int data[4];
 			GLM_DEFAULTED_DEFAULT_CTOR_QUALIFIER GLM_CONSTEXPR type() GLM_DEFAULT;
-			type(glm_i32vec4 v) { vst1q_u32(data, v); }
-			operator glm_i32vec4() const { return vld1q_u32(data); }
+			type(glm_i32vec4 v) { vst1q_s32(data, v); }
+			operator glm_i32vec4() const { return vld1q_s32(data); }
 		};
 	};
-
+*/
+	template<>
+	struct storage<3, int, true> : public storage<4, int, true>
+	{};
+/*
+	template<>
+	struct storage<3, int, false, true>
+	{
+		struct type
+		{
+			int data[3];
+			GLM_DEFAULTED_DEFAULT_CTOR_QUALIFIER GLM_CONSTEXPR type() GLM_DEFAULT;
+			inline type(glm_i32vec4 v) {
+				data[0] = vgetq_lane_s32(v, 0);
+				data[1] = vgetq_lane_s32(v, 1);
+				data[2] = vgetq_lane_s32(v, 2);
+			}
+			inline operator glm_i32vec4() const {
+				const int init[4] = { data[2], data[2], data[1], data[0] };
+				return vld1q_s32(init);
+			}
+		};
+	};
+*/
 	template<>
 	struct storage<4, unsigned int, true>
 	{
 		typedef glm_u32vec4 type;
 	};
-
+/*
 	template<>
 	struct storage<4, unsigned int, false, true>
 	{
@@ -328,9 +385,41 @@ namespace detail
 		{
 			unsigned int data[4];
 			GLM_DEFAULTED_DEFAULT_CTOR_QUALIFIER GLM_CONSTEXPR type() GLM_DEFAULT;
-			type(glm_i32vec4 v) { vst1q_u32(data, v); }
-			operator glm_i32vec4() const { return vld1q_u32(data); }
+			type(glm_u32vec4 v) { vst1q_u32(data, v); }
+			operator glm_u32vec4() const { return vld1q_u32(data); }
 		};
+	};
+*/
+	template<>
+	struct storage<3, unsigned int, true> : public storage<4, unsigned int, true>
+	{};
+
+/*
+	template<>
+	struct storage<3, unsigned int, false, true>
+	{
+		struct type
+		{
+			unsigned int data[3];
+			GLM_DEFAULTED_DEFAULT_CTOR_QUALIFIER GLM_CONSTEXPR type() GLM_DEFAULT;
+			inline type(glm_u32vec4 v) {
+				data[0] = vgetq_lane_u32(v, 0);
+				data[1] = vgetq_lane_u32(v, 1);
+				data[2] = vgetq_lane_u32(v, 2);
+			}
+			inline operator glm_u32vec4() const {
+				const unsigned int init[4] = { data[2], data[2], data[1], data[0] };
+				return vld1q_u32(init);
+			}
+		};
+	};
+*/
+	template<>
+	struct storage<3, double, true>
+	{
+		typedef struct alignas(4 * sizeof(double)) type {
+			double data[4];
+		} type;
 	};
 
 #	endif

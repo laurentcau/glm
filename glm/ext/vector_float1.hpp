@@ -27,5 +27,7 @@ namespace glm
 	/// 1 components vector of single-precision floating-point numbers.
 	typedef vec<1, float, defaultp>		vec1;
 
+	typedef vec<1, float, packed_highp>		packed_vec1;
+
 	/// @}
 }//namespace glm

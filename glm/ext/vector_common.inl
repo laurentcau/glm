@@ -101,7 +101,7 @@ namespace glm
 	template<length_t L, typename T, qualifier Q>
 	GLM_FUNC_QUALIFIER vec<L, T, Q> clamp(vec<L, T, Q> const& Texcoord)
 	{
-		return glm::clamp(Texcoord, vec<L, T, Q>(0), vec<L, T, Q>(1));
+		return glm::clamp(Texcoord, vec<L, T, Q>(T(0)), vec<L, T, Q>(1));
 	}
 
 	template<length_t L, typename T, qualifier Q>

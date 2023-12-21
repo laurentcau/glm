@@ -95,6 +95,7 @@ option(GLM_TEST_ENABLE_SIMD_SSE4_1 "Enable SSE 4.1 optimizations" OFF)
 option(GLM_TEST_ENABLE_SIMD_SSE4_2 "Enable SSE 4.2 optimizations" OFF)
 option(GLM_TEST_ENABLE_SIMD_AVX "Enable AVX optimizations" OFF)
 option(GLM_TEST_ENABLE_SIMD_AVX2 "Enable AVX2 optimizations" OFF)
+option(GLM_TEST_ENABLE_SIMD_NEON "Enable ARM NEON optimizations" OFF)
 option(GLM_TEST_FORCE_PURE "Force 'pure' instructions" OFF)
 
 if(GLM_TEST_FORCE_PURE)
@@ -109,7 +110,7 @@ elseif(GLM_TEST_ENABLE_SIMD_AVX2)
 	add_definitions(-DGLM_FORCE_INTRINSICS)
 
 	if((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
-		add_compile_options(-mavx2)
+		add_compile_options(-mavx2 -mfma)
 	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Intel")
 		add_compile_options(/QxAVX2)
 	elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
@@ -188,6 +189,9 @@ elseif(GLM_TEST_ENABLE_SIMD_SSE2)
 		add_compile_options(/arch:SSE2)
 	endif()
 	message(STATUS "GLM: SSE2 instruction set")
+elseif(GLM_TEST_ENABLE_SIMD_NEON)
+	add_definitions(-DGLM_FORCE_NEON)
+	message(STATUS "GLM: ARM NEON instruction set")
 endif()
 
 # Compiler and default options
@@ -197,8 +201,10 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 		message("GLM: Clang - ${CMAKE_CXX_COMPILER_ID} compiler")
 	endif()
 
+	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+	
 	add_compile_options(-Werror -Weverything)
-	add_compile_options(-Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-c++11-long-long -Wno-padded -Wno-gnu-anonymous-struct -Wno-nested-anon-types)
+	add_compile_options(-Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-c++11-long-long -Wno-padded -Wno-gnu-anonymous-struct -Wno-nested-anon-types -Wno-unsafe-buffer-usage)
     add_compile_options(-Wno-undefined-reinterpret-cast -Wno-sign-conversion -Wno-unused-variable -Wno-missing-prototypes -Wno-unreachable-code -Wno-missing-variable-declarations -Wno-sign-compare -Wno-global-constructors -Wno-unused-macros -Wno-format-nonliteral -Wno-float-equal)
 
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")

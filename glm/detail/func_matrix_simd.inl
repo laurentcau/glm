@@ -17,10 +17,14 @@ namespace detail
 		GLM_FUNC_QUALIFIER static mat<4, 4, float, Q> call(mat<4, 4, float, Q> const& x, mat<4, 4, float, Q> const& y)
 		{
 			mat<4, 4, float, Q> Result;
-			glm_mat4_matrixCompMult(
-			        &x[0].data,
-			        &y[0].data,
-			        &Result[0].data);
+			glm_vec4 inX[4] = { x[0].data , x[1].data , x[2].data, x[3].data };
+			glm_vec4 inY[4] = { y[0].data , y[1].data , y[2].data, y[3].data };
+			glm_vec4 out[4];
+			glm_mat4_matrixCompMult(inX, inY, out);
+			Result[0].data = out[0];
+			Result[1].data = out[1];
+			Result[2].data = out[2];
+			Result[3].data = out[3];
 			return Result;
 		}
 	};
@@ -32,17 +36,41 @@ namespace detail
 		GLM_FUNC_QUALIFIER static mat<4, 4, float, Q> call(mat<4, 4, float, Q> const& m)
 		{
 			mat<4, 4, float, Q> Result;
-			glm_mat4_transpose(&m[0].data, &Result[0].data);
+			glm_vec4 in[4] = { m[0].data , m[1].data , m[2].data, m[3].data };
+			glm_vec4 out[4];
+			glm_mat4_transpose(in, out);
+			Result[0].data = out[0];
+			Result[1].data = out[1];
+			Result[2].data = out[2];
+			Result[3].data = out[3];
 			return Result;
 		}
 	};
+
+	template<qualifier Q>
+	struct compute_transpose<3, 3, float, Q, true>
+	{
+		GLM_FUNC_QUALIFIER static mat<3, 3, float, Q> call(mat<3, 3, float, Q> const& m)
+		{
+			mat<3, 3, float, Q> Result;
+			glm_vec4 in[4] = { m[0].data , m[1].data , m[2].data, m[2].data };
+			glm_vec4 out[4];
+			glm_mat4_transpose(in, out);
+			Result[0].data = out[0];
+			Result[1].data = out[1];
+			Result[2].data = out[2];
+			return Result;
+		}
+	};
+
 
 	template<qualifier Q>
 	struct compute_determinant<4, 4, float, Q, true>
 	{
 		GLM_FUNC_QUALIFIER static float call(mat<4, 4, float, Q> const& m)
 		{
-			return _mm_cvtss_f32(glm_mat4_determinant(&m[0].data));
+			glm_vec4 in[4] = { m[0].data , m[1].data , m[2].data, m[3].data };
+			return _mm_cvtss_f32(glm_mat4_determinant(in));
 		}
 	};
 
@@ -52,7 +80,13 @@ namespace detail
 		GLM_FUNC_QUALIFIER static mat<4, 4, float, Q> call(mat<4, 4, float, Q> const& m)
 		{
 			mat<4, 4, float, Q> Result;
-			glm_mat4_inverse(&m[0].data, &Result[0].data);
+			glm_vec4 in[4] = { m[0].data , m[1].data , m[2].data, m[3].data };
+			glm_vec4 out[4];
+			glm_mat4_inverse(in, out);
+			Result[0].data = out[0];
+			Result[1].data = out[1];
+			Result[2].data = out[2];
+			Result[3].data = out[3];
 			return Result;
 		}
 	};

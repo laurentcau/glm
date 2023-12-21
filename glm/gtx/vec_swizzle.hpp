@@ -286,7 +286,7 @@ namespace glm {
 
 	template<typename T, qualifier Q>
 	GLM_INLINE glm::vec<3, T, Q> xyz(const glm::vec<4, T, Q> &v) {
-		return glm::vec<3, T, Q>(v.x, v.y, v.z);
+		return toVec3(v);
 	}
 
 	// xyw

@@ -14,6 +14,31 @@
 #include <chrono>
 #include <cstdio>
 
+
+inline bool
+is_aligned(const void* ptr, std::uintptr_t alignment) noexcept {
+	auto iptr = reinterpret_cast<std::uintptr_t>(ptr);
+	return !(iptr % alignment);
+}
+
+template <typename matType>
+static void align_check(matType const& M, std::vector<matType> const& I, std::vector<matType>& O)
+{
+	if (matType::col_type::is_aligned::value)
+	{
+		if (!is_aligned(&M, 16))
+			abort();
+		for (std::size_t i = 0, n = I.size(); i < n; ++i)
+		{
+			if (!is_aligned(&I[i], 16))
+				abort();
+
+			if (!is_aligned(&O[i], 16))
+				abort();
+		}
+	}
+}
+
 template <typename matType>
 static void test_mat_mul_mat(matType const& M, std::vector<matType> const& I, std::vector<matType>& O)
 {
@@ -32,6 +57,8 @@ static int launch_mat_mul_mat(std::vector<matType>& O, matType const& Transform,
 	for(std::size_t i = 0; i < Samples; ++i)
 		I[i] = Scale * static_cast<T>(i);
 
+	align_check<matType>(Transform, I, O);
+	
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 	test_mat_mul_mat<matType>(Transform, I, O);
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
@@ -65,6 +92,25 @@ static int comp_mat2_mul_mat2(std::size_t Samples)
 	return Error;
 }
 
+template<typename T1, typename T2>
+bool percent_error(const T1& a, const T2& b, float percentThreshold)
+{
+	typedef typename T1::value_type value_type;
+	for (int i = 0; i < a.length(); ++i)
+		for (int j = 0; j < a[i].length(); ++j)
+		{
+			value_type v;
+			if (a[i][j] != 0.0f)
+				v = ((b[i][j] - a[i][j]) / a[i][j]) * 100.0f;
+			else
+				v = b[i][j] * 100.0f;
+
+			if (v > percentThreshold)
+				return false;
+		}
+	return true;
+}
+
 template <typename packedMatType, typename alignedMatType>
 static int comp_mat3_mul_mat3(std::size_t Samples)
 {
@@ -85,7 +131,7 @@ static int comp_mat3_mul_mat3(std::size_t Samples)
 	{
 		packedMatType const A = SISD[i];
 		packedMatType const B = SIMD[i];
-		Error += glm::all(glm::equal(A, B, static_cast<T>(0.001))) ? 0 : 1;
+		Error += percent_error(A, B, 0.01f) ? 0 : 1;
 	}
 	
 	return Error;
@@ -111,7 +157,7 @@ static int comp_mat4_mul_mat4(std::size_t Samples)
 	{
 		packedMatType const A = SISD[i];
 		packedMatType const B = SIMD[i];
-		Error += glm::all(glm::equal(A, B, static_cast<T>(0.001))) ? 0 : 1;
+		Error += percent_error(A, B, 0.01f) ? 0 : 1;
 	}
 	
 	return Error;
@@ -125,21 +171,21 @@ int main()
 
 	std::printf("mat2 * mat2:\n");
 	Error += comp_mat2_mul_mat2<glm::mat2, glm::aligned_mat2>(Samples);
-	
+
 	std::printf("dmat2 * dmat2:\n");
 	Error += comp_mat2_mul_mat2<glm::dmat2, glm::aligned_dmat2>(Samples);
 
 	std::printf("mat3 * mat3:\n");
-	Error += comp_mat3_mul_mat3<glm::mat3, glm::aligned_mat3>(Samples);
-	
+	Error += comp_mat3_mul_mat3<glm::packed_mat3, glm::aligned_mat3>(Samples);
+
 	std::printf("dmat3 * dmat3:\n");
-	Error += comp_mat3_mul_mat3<glm::dmat3, glm::aligned_dmat3>(Samples);
+	Error += comp_mat3_mul_mat3<glm::packed_dmat3, glm::aligned_dmat3>(Samples);
 
 	std::printf("mat4 * mat4:\n");
-	Error += comp_mat4_mul_mat4<glm::mat4, glm::aligned_mat4>(Samples);
+	Error += comp_mat4_mul_mat4<glm::packed_mat4, glm::aligned_mat4>(Samples);
 	
 	std::printf("dmat4 * dmat4:\n");
-	Error += comp_mat4_mul_mat4<glm::dmat4, glm::aligned_dmat4>(Samples);
+	Error += comp_mat4_mul_mat4 < glm::packed_dmat4, glm::aligned_dmat4> (Samples);
 
 	return Error;
 }
