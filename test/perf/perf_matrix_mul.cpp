@@ -100,12 +100,12 @@ bool percent_error(const T1& a, const T2& b, float percentThreshold)
 		for (int j = 0; j < a[i].length(); ++j)
 		{
 			value_type v;
-			if (a[i][j] != 0.0f)
-				v = ((b[i][j] - a[i][j]) / a[i][j]) * 100.0f;
+			if (a[i][j] != value_type(0))
+				v = ((b[i][j] - a[i][j]) / a[i][j]) * value_type(100);
 			else
-				v = b[i][j] * 100.0f;
+				v = b[i][j] * value_type(100);
 
-			if (v > percentThreshold)
+			if (v > value_type(percentThreshold))
 				return false;
 		}
 	return true;
@@ -114,8 +114,7 @@ bool percent_error(const T1& a, const T2& b, float percentThreshold)
 template <typename packedMatType, typename alignedMatType>
 static int comp_mat3_mul_mat3(std::size_t Samples)
 {
-	typedef typename packedMatType::value_type T;
-	
+
 	int Error = 0;
 
 	std::vector<packedMatType> SISD;
@@ -144,7 +143,6 @@ static int comp_mat3_mul_mat3(std::size_t Samples)
 template <typename packedMatType, typename alignedMatType>
 static int comp_mat4_mul_mat4(std::size_t Samples)
 {
-	typedef typename packedMatType::value_type T;
 	
 	int Error = 0;
 

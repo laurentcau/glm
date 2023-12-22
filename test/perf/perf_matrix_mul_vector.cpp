@@ -128,14 +128,14 @@ int main()
 	
 	int Error = 0;
 
-	//std::printf("mat2 * vec2:\n");
-	//Error += comp_mat2_mul_vec2<glm::mat2, glm::vec2, glm::aligned_mat2, glm::aligned_vec2>(Samples);
-	//
-	//std::printf("dmat2 * dvec2:\n");
-	//Error += comp_mat2_mul_vec2<glm::dmat2, glm::dvec2,glm::aligned_dmat2, glm::aligned_dvec2>(Samples);
+	std::printf("mat2 * vec2:\n");
+	Error += comp_mat2_mul_vec2<glm::mat2, glm::vec2, glm::aligned_mat2, glm::aligned_vec2>(Samples);
 
-	//std::printf("mat3 * vec3:\n");
-	//Error += comp_mat3_mul_vec3<glm::mat3, glm::vec3, glm::aligned_mat3, glm::aligned_vec3>(Samples);
+	std::printf("dmat2 * dvec2:\n");
+	Error += comp_mat2_mul_vec2<glm::dmat2, glm::dvec2, glm::aligned_dmat2, glm::aligned_dvec2>(Samples);
+
+	std::printf("mat3 * vec3:\n");
+	Error += comp_mat3_mul_vec3<glm::mat3, glm::vec3, glm::aligned_mat3, glm::aligned_vec3>(Samples);
 	
 	std::printf("dmat3 * dvec3:\n");
 	Error += comp_mat3_mul_vec3<glm::dmat3, glm::dvec3, glm::aligned_dmat3, glm::aligned_dvec3>(Samples);

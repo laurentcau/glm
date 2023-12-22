@@ -51,8 +51,8 @@ namespace detail
 	{
 		GLM_FUNC_QUALIFIER static vec<3, float, Q> call(vec<3, float, Q> const& a, vec<3, float, Q> const& b)
 		{
-			vec<4, float, Q> aa = xyz0(a);
-			vec<4, float, Q> bb = xyz0(b);
+			vec<4, float, Q> aa = xyzz(a);
+			vec<4, float, Q> bb = xyzz(b);
 			__m128 const xpd0 = glm_vec4_cross(aa.data, bb.data);
 
 			vec<3, float, Q> Result;

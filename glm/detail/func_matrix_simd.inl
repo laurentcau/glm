@@ -42,8 +42,12 @@ namespace detail
 	{
 		GLM_FUNC_QUALIFIER static mat<3, 3, float, Q> call(mat<3, 3, float, Q> const& m)
 		{
+			mat<4, 4, float, Q> tmp;
+			glm_mat3_transpose(&m[0].data, &tmp[0].data);
 			mat<3, 3, float, Q> Result;
-			glm_mat4_transpose(&m[0].data, &Result[0].data);
+			Result[0] = detail::convert_vec4_to_vec3<float, Q, true>::call(tmp[0]);
+			Result[1] = detail::convert_vec4_to_vec3<float, Q, true>::call(tmp[1]);
+			Result[2] = detail::convert_vec4_to_vec3<float, Q, true>::call(tmp[2]);
 			return Result;
 		}
 	};

@@ -257,10 +257,7 @@ namespace detail
 		}
 	};
 
-	
-
-
-	template<length_t L, typename T, qualifier Q, bool Simd>
+	template<length_t L, typename T, qualifier Q, bool Aligned>
 	struct compute_min_vector
 	{
 		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& x, vec<L, T, Q> const& y)

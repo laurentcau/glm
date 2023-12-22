@@ -221,7 +221,7 @@ namespace detail
 	{};
 
 	template<>
-	struct storage<4, int, true, true>
+	struct storage<4, int, true>
 	{
 		typedef glm_i32vec4 type;
 	};

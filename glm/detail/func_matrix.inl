@@ -343,7 +343,7 @@ namespace detail
 			Inverse = transpose(Inverse);
 
 			T Determinant = compute_dot<vec<4, T, Q>, T, true>::call(a, compute_cross<T, Q, true>::call(b, c));
-			T OneOverDeterminant = static_cast<T>(1) / Determinant;
+			vec<3, T, Q> OneOverDeterminant(static_cast<T>(1) / Determinant);
 			Inverse *= OneOverDeterminant;
 			return Inverse;
 		}

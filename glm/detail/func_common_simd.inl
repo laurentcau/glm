@@ -273,9 +273,7 @@ namespace detail
 		GLM_FUNC_QUALIFIER static vec<4, float, Q> call(vec<3, float, Q> const& a)
 		{
 			vec<4, float, Q> v;
-			__m128i mask = _mm_set_epi32(0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
-			__m128 v0 = _mm_castsi128_ps(_mm_and_si128(_mm_castps_si128(a.data), mask));
-			v.data = v0;
+			v.data = _mm_blend_ps(a.data, _mm_setzero_ps(), 8);
 			return v;
 		}
 	};
@@ -286,9 +284,7 @@ namespace detail
 		GLM_FUNC_QUALIFIER static vec<4, float, Q> call(vec<3, float, Q> const& a)
 		{
 			vec<4, float, Q> v;
-			__m128 t1 = _mm_permute_ps(a.data, _MM_SHUFFLE(0, 2, 1, 3)); //permute x, w
-			__m128 t2 = _mm_move_ss(t1, _mm_set_ss(1.0f)); // set x to 1.0f
-			v.data = _mm_permute_ps(t2, _MM_SHUFFLE(0, 2, 1, 3)); //permute x, w
+			v.data = _mm_blend_ps(a.data, _mm_set1_ps(1.0f), 8);
 			return v;
 		}
 	};
@@ -311,10 +307,7 @@ namespace detail
 		{
 			vec<4, double, Q> v;
 #if (GLM_ARCH & GLM_ARCH_AVX_BIT)
-			glm_dvec4 av4 = a.data;
-			__m256i mask = _mm256_set_epi64x(0, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF);
-			__m256d v0 = _mm256_and_pd(a.data, _mm256_castsi256_pd(mask));
-			v.data = v0;
+			v.data = _mm256_blend_pd(a.data, _mm256_setzero_pd(), 8);
 #else
 			v.data.setv(0, a.data.getv(0));
 			glm_dvec2 av2 = a.data.getv(1);
@@ -350,9 +343,7 @@ namespace detail
 		{
 			vec<4, double, Q> v;
 #if (GLM_ARCH & GLM_ARCH_AVX_BIT)
-			__m256d t1 = _mm256_permute4x64_pd(a.data, _MM_SHUFFLE(0, 2, 1, 3)); //permute x, w
-			__m256d t2 = _mm_move_sd(t1, _mm_set_sd(1.0f)); // set x to 1.0f
-			v.data = _mm256_permute4x64_pd(t2, _MM_SHUFFLE(0, 2, 1, 3)); //permute x, w
+			v.data = _mm256_blend_pd(a.data, _mm256_set1_pd(1.0), 8);
 #else
 			v.data.setv(0, a.data.getv(0));
 			glm_dvec2 av2 = a.data.getv(1);
