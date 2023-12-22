@@ -273,7 +273,6 @@ namespace detail
 		GLM_FUNC_QUALIFIER static vec<4, float, Q> call(vec<3, float, Q> const& a)
 		{
 			vec<4, float, Q> v;
-			glm_vec4 av4 = a.data;
 			__m128i mask = _mm_set_epi32(0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
 			__m128 v0 = _mm_castsi128_ps(_mm_and_si128(_mm_castps_si128(a.data), mask));
 			v.data = v0;
@@ -281,6 +280,29 @@ namespace detail
 		}
 	};
 
+	template<qualifier Q>
+	struct convert_vec3_to_vec4W1<float, Q, true>
+	{
+		GLM_FUNC_QUALIFIER static vec<4, float, Q> call(vec<3, float, Q> const& a)
+		{
+			vec<4, float, Q> v;
+			__m128 t1 = _mm_permute_ps(a.data, _MM_SHUFFLE(0, 2, 1, 3)); //permute x, w
+			__m128 t2 = _mm_move_ss(t1, _mm_set_ss(1.0f)); // set x to 1.0f
+			v.data = _mm_permute_ps(t2, _MM_SHUFFLE(0, 2, 1, 3)); //permute x, w
+			return v;
+		}
+	};
+
+	template<qualifier Q>
+	struct convert_vec3_to_vec4WZ<float, Q, true>
+	{
+		GLM_FUNC_QUALIFIER static vec<4, float, Q> call(vec<3, float, Q> const& a)
+		{
+			vec<4, float, Q> v;
+			v.data = _mm_permute_ps(a.data, _MM_SHUFFLE(2, 2, 1, 0));
+			return v;
+		}
+	};
 
 	template<qualifier Q>
 	struct convert_vec3_to_vec4W0<double, Q, true>
@@ -304,6 +326,44 @@ namespace detail
 	};
 
 	template<qualifier Q>
+	struct convert_vec3_to_vec4WZ<double, Q, true>
+	{
+		GLM_FUNC_QUALIFIER static vec<4, double, Q> call(vec<3, double, Q> const& a)
+		{
+			vec<4, double, Q> v;
+#if (GLM_ARCH & GLM_ARCH_AVX_BIT)
+			v.data = _mm256_permute4x64_pd(a.data, _MM_SHUFFLE(2, 2, 1, 0));
+#else
+			v.data.setv(0, a.data.getv(0));
+			glm_dvec2 av2 = a.data.getv(1);
+			__m128d t1 = _mm_shuffle_pd(av2, av2, 0);
+			v.data.setv(1, t1);
+#endif
+			return v;
+		}
+	};
+
+	template<qualifier Q>
+	struct convert_vec3_to_vec4W1<double, Q, true>
+	{
+		GLM_FUNC_QUALIFIER static vec<4, double, Q> call(vec<3, double, Q> const& a)
+		{
+			vec<4, double, Q> v;
+#if (GLM_ARCH & GLM_ARCH_AVX_BIT)
+			__m256d t1 = _mm256_permute4x64_pd(a.data, _MM_SHUFFLE(0, 2, 1, 3)); //permute x, w
+			__m256d t2 = _mm_move_sd(t1, _mm_set_sd(1.0f)); // set x to 1.0f
+			v.data = _mm256_permute4x64_pd(t2, _MM_SHUFFLE(0, 2, 1, 3)); //permute x, w
+#else
+			v.data.setv(0, a.data.getv(0));
+			glm_dvec2 av2 = a.data.getv(1);
+			av2 = _mm_shuffle_pd(av2, _mm_set1_pd(1.0f), 2);
+			v.data.setv(1, av2);
+#endif
+			return v;
+		}
+	};
+
+	template<qualifier Q>
 	struct convert_vec4_to_vec3<float, Q, true> {
 		GLM_FUNC_QUALIFIER static vec<3, float, Q> call(vec<4, float, Q> const& a)
 		{
@@ -312,6 +372,22 @@ namespace detail
 			return v;
 		}
 	};
+
+	template<qualifier Q>
+	struct convert_vec4_to_vec3<double, Q, true> {
+		GLM_FUNC_QUALIFIER static vec<3, double, Q> call(vec<4, double, Q> const& a)
+		{
+			vec<3, double, Q> v;
+#if GLM_ARCH & GLM_ARCH_AVX_BIT
+			v.data = a.data;
+#else
+			v.data.setv(0, a.data.getv(0));
+			v.data.setv(1, a.data.getv(1));
+#endif
+			return v;
+		}
+	};
+
 
 	template<length_t L, qualifier Q>
 	struct convert_splat<L, float, Q, true> {

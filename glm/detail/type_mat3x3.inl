@@ -493,18 +493,18 @@ namespace glm
 		{
 			GLM_FUNC_QUALIFIER static mat<3, 3, T, Q> call(mat<3, 3, T, Q> const& m1, mat<3, 3, T, Q> const& m2)
 			{
-				typename mat<4, 4, T, qualifier(to_aligned<Q>::value)>::col_type const SrcA0 = toVec4W0(m1[0]);
-				typename mat<4, 4, T, qualifier(to_aligned<Q>::value)>::col_type const SrcA1 = toVec4W0(m1[1]);
-				typename mat<4, 4, T, qualifier(to_aligned<Q>::value)>::col_type const SrcA2 = toVec4W0(m1[2]);
+				typename mat<4, 4, T, Q>::col_type const SrcA0 = xyzz(m1[0]);
+				typename mat<4, 4, T, Q>::col_type const SrcA1 = xyzz(m1[1]);
+				typename mat<4, 4, T, Q>::col_type const SrcA2 = xyzz(m1[2]);
 
-				typename mat<4, 4, T, qualifier(to_aligned<Q>::value)>::col_type const SrcB0 = toVec4W0(m2[0]);
-				typename mat<4, 4, T, qualifier(to_aligned<Q>::value)>::col_type const SrcB1 = toVec4W0(m2[1]);
-				typename mat<4, 4, T, qualifier(to_aligned<Q>::value)>::col_type const SrcB2 = toVec4W0(m2[2]);
+				typename mat<4, 4, T, Q>::col_type const SrcB0 = xyzz(m2[0]);
+				typename mat<4, 4, T, Q>::col_type const SrcB1 = xyzz(m2[1]);
+				typename mat<4, 4, T, Q>::col_type const SrcB2 = xyzz(m2[2]);
 
-				mat<3, 3, T, qualifier(to_aligned<Q>::value)> Result;
-				Result[0] = toVec3(glm::fma(SrcA2, splatZ(SrcB0), glm::fma(SrcA1, splatY(SrcB0), SrcA0 * splatX(SrcB0))));
-				Result[1] = toVec3(glm::fma(SrcA2, splatZ(SrcB1), glm::fma(SrcA1, splatY(SrcB1), SrcA0 * splatX(SrcB1))));
-				Result[2] = toVec3(glm::fma(SrcA2, splatZ(SrcB2), glm::fma(SrcA1, splatY(SrcB2), SrcA0 * splatX(SrcB2))));
+				mat<3, 3, T, Q> Result;
+				Result[0] = xyz(glm::fma(SrcA2, splatZ(SrcB0), glm::fma(SrcA1, splatY(SrcB0), SrcA0 * splatX(SrcB0))));
+				Result[1] = xyz(glm::fma(SrcA2, splatZ(SrcB1), glm::fma(SrcA1, splatY(SrcB1), SrcA0 * splatX(SrcB1))));
+				Result[2] = xyz(glm::fma(SrcA2, splatZ(SrcB2), glm::fma(SrcA1, splatY(SrcB2), SrcA0 * splatX(SrcB2))));
 				return mat<3, 3, T, Q>(Result);
 			}
 		};

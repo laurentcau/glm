@@ -48,7 +48,7 @@ static int comp_vec2_mul_mat2(std::size_t Samples)
 	
 	int Error = 0;
 
-	packedMatType Transform = packedMatType(1, 2, 3, 4);
+	packedMatType const Transform(1, 2, 3, 4);
 	packedVecType const Scale(0.01, 0.02);
 
 	std::vector<packedVecType> SISD;
@@ -67,8 +67,7 @@ static int comp_vec2_mul_mat2(std::size_t Samples)
 	return Error;
 }
 
-template <typename packedMatType, typename packedVecType,
-	typename alignedMatType, typename alignedVecType>
+template <typename packedMatType, typename packedVecType, typename alignedMatType, typename alignedVecType>
 static int comp_vec3_mul_mat3(std::size_t Samples)
 {
 	typedef typename packedMatType::value_type T;
@@ -94,8 +93,7 @@ static int comp_vec3_mul_mat3(std::size_t Samples)
 	return Error;
 }
 
-template <typename packedMatType, typename packedVecType, 
-		 typename alignedMatType, typename alignedVecType>
+template <typename packedMatType, typename packedVecType, typename alignedMatType, typename alignedVecType>
 static int comp_vec4_mul_mat4(std::size_t Samples)
 {
 	typedef typename packedMatType::value_type T;
@@ -123,27 +121,27 @@ static int comp_vec4_mul_mat4(std::size_t Samples)
 
 int main()
 {
-	std::size_t const Samples = 100000;
+	std::size_t const Samples = 1000;
 	
 	int Error = 0;
 
 	std::printf("vec2 * mat2:\n");
-	Error += comp_vec2_mul_mat2<glm::packed_mat2, glm::packed_vec2, glm::aligned_mat2, glm::aligned_vec2>(Samples);
+	Error += comp_vec2_mul_mat2<glm::mat2, glm::vec2, glm::aligned_mat2, glm::aligned_vec2>(Samples);
 
 	std::printf("dvec2 * dmat2:\n");
-	Error += comp_vec2_mul_mat2<glm::packed_dmat2, glm::packed_dvec2, glm::aligned_dmat2, glm::aligned_dvec2>(Samples);
+	Error += comp_vec2_mul_mat2<glm::dmat2, glm::dvec2,glm::aligned_dmat2, glm::aligned_dvec2>(Samples);
 
 	std::printf("vec3 * mat3:\n");
-	Error += comp_vec3_mul_mat3<glm::packed_mat3, glm::packed_vec3, glm::aligned_mat3, glm::aligned_vec3>(Samples);
+	Error += comp_vec3_mul_mat3<glm::mat3, glm::vec3, glm::aligned_mat3, glm::aligned_vec3>(Samples);
 
 	std::printf("dvec3 * dmat3:\n");
-	Error += comp_vec3_mul_mat3<glm::packed_dmat3, glm::packed_dvec3, glm::aligned_dmat3, glm::aligned_dvec3>(Samples);
+	Error += comp_vec3_mul_mat3<glm::dmat3, glm::dvec3, glm::aligned_dmat3, glm::aligned_dvec3>(Samples);
 
 	std::printf("vec4 * mat4:\n");
-	Error += comp_vec4_mul_mat4<glm::packed_mat4, glm::packed_vec4, glm::aligned_mat4, glm::aligned_vec4>(Samples);
+	Error += comp_vec4_mul_mat4<glm::mat4, glm::vec4, glm::aligned_mat4, glm::aligned_vec4>(Samples);
 	
 	std::printf("dvec4 * dmat4:\n");
-	Error += comp_vec4_mul_mat4<glm::packed_dmat4, glm::packed_dvec4, glm::aligned_dmat4, glm::aligned_dvec4>(Samples);
+	Error += comp_vec4_mul_mat4<glm::dmat4, glm::dvec4, glm::aligned_dmat4, glm::aligned_dvec4>(Samples);
 
 	return Error;
 }

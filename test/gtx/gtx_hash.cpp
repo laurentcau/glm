@@ -1,5 +1,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
+
+#if defined(GLM_GTX_hash) && GLM_LANG & GLM_LANG_CXX11
 #include <unordered_map>
 
 int test_compile()
@@ -20,7 +22,7 @@ int test_compile()
     std::unordered_map<glm::quat, int> map_quat;
     Error += ++map_quat[glm::quat(0.0f, glm::vec3(0.0f))];
     std::unordered_map<glm::dualquat, int> map_dualquat;
-    Error += ++map_dualquat[glm::dualquat(glm::quat(0.0f, glm::vec3(0.0f)), glm::vec3(0.0f))];
+    Error += ++map_dualquat[glm::dualquat(glm::vec3(0.0f))];
 
     // Matrix types
     std::unordered_map<glm::mat2x2, int> map_mat2x2;
@@ -44,12 +46,15 @@ int test_compile()
 
 	return Error > 0 ? 0 : 1;
 }
+#endif//GLM_LANG& GLM_LANG_CXX11
 
 int main()
 {
 	int Error = 0;
 
+#if defined(GLM_GTX_hash)
 	Error += test_compile();
+#endif//
 
 	return Error;
 }

@@ -7,126 +7,6 @@ namespace glm{
 namespace detail
 {
 
-	//template<typename T, qualifier Q>
-	//struct compute_vec_sub<4, T, Q, false>
-	//{
-	//	GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<4, T, Q> call(vec<4, T, Q> const& a, vec<4, T, Q> const& b)
-	//	{
-	//		return vec<4, T, Q>(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w);
-	//	}
-	//};
-
-	//template<typename T, qualifier Q>
-	//struct compute_vec_mul<4, T, Q, false>
-	//{
-	//	GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<4, T, Q> call(vec<4, T, Q> const& a, vec<4, T, Q> const& b)
-	//	{
-	//		return vec<4, T, Q>(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w);
-	//	}
-	//};
-
-	//template<typename T, qualifier Q>
-	//struct compute_vec_div<4, T, Q, false>
-	//{
-	//	GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<4, T, Q> call(vec<4, T, Q> const& a, vec<4, T, Q> const& b)
-	//	{
-	//		return vec<4, T, Q>(a.x / b.x, a.y / b.y, a.z / b.z, a.w / b.w);
-	//	}
-	//};
-
-	//template<typename T, qualifier Q>
-	//struct compute_vec_mod<4, T, Q, false>
-	//{
-	//	GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<4, T, Q> call(vec<4, T, Q> const& a, vec<4, T, Q> const& b)
-	//	{
-	//		return vec<4, T, Q>(a.x % b.x, a.y % b.y, a.z % b.z, a.w % b.w);
-	//	}
-	//};
-
-	//template<qualifier Q>
-	//struct compute_vec_mod<4, int, Q, true>
-	//{
-	//	GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<4, int, Q> call(vec<4, int, Q> const& a, vec<4, int, Q> const& b)
-	//	{
-	//		return vec<4, int, Q>(a.x % b.x, a.y % b.y, a.z % b.z, a.w % b.w);
-	//	}
-	//};
-
-	//template<typename T, qualifier Q, int IsInt, std::size_t Size>
-	//struct compute_vec_and<4, T, Q, IsInt, Size, false>
-	//{
-	//	GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<4, T, Q> call(vec<4, T, Q> const& a, vec<4, T, Q> const& b)
-	//	{
-	//		return vec<4, T, Q>(a.x & b.x, a.y & b.y, a.z & b.z, a.w & b.w);
-	//	}
-	//};
-
-	//template<typename T, qualifier Q, int IsInt, std::size_t Size>
-	//struct compute_vec_or<4, T, Q, IsInt, Size, false>
-	//{
-	//	GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<4, T, Q> call(vec<4, T, Q> const& a, vec<4, T, Q> const& b)
-	//	{
-	//		return vec<4, T, Q>(a.x | b.x, a.y | b.y, a.z | b.z, a.w | b.w);
-	//	}
-	//};
-
-	//template<typename T, qualifier Q, int IsInt, std::size_t Size>
-	//struct compute_vec_xor<4, T, Q, IsInt, Size, false>
-	//{
-	//	GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<4, T, Q> call(vec<4, T, Q> const& a, vec<4, T, Q> const& b)
-	//	{
-	//		return vec<4, T, Q>(a.x ^ b.x, a.y ^ b.y, a.z ^ b.z, a.w ^ b.w);
-	//	}
-	//};
-
-	//template<typename T, qualifier Q, int IsInt, std::size_t Size>
-	//struct compute_vec_shift_left<4, T, Q, IsInt, Size, false>
-	//{
-	//	GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<4, T, Q> call(vec<4, T, Q> const& a, vec<4, T, Q> const& b)
-	//	{
-	//		return vec<4, T, Q>(a.x << b.x, a.y << b.y, a.z << b.z, a.w << b.w);
-	//	}
-	//};
-
-	//template<typename T, qualifier Q, int IsInt, std::size_t Size>
-	//struct compute_vec_shift_right<4, T, Q, IsInt, Size, false>
-	//{
-	//	GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<4, T, Q> call(vec<4, T, Q> const& a, vec<4, T, Q> const& b)
-	//	{
-	//		return vec<4, T, Q>(a.x >> b.x, a.y >> b.y, a.z >> b.z, a.w >> b.w);
-	//	}
-	//};
-
-	//template<typename T, qualifier Q, int IsInt, std::size_t Size>
-	//struct compute_vec_equal<4, T, Q, IsInt, Size, false>
-	//{
-	//	GLM_FUNC_QUALIFIER GLM_CONSTEXPR static bool call(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2)
-	//	{
-	//		return
-	//			detail::compute_equal<T, std::numeric_limits<T>::is_iec559>::call(v1.x, v2.x) &&
-	//			detail::compute_equal<T, std::numeric_limits<T>::is_iec559>::call(v1.y, v2.y) &&
-	//			detail::compute_equal<T, std::numeric_limits<T>::is_iec559>::call(v1.z, v2.z) &&
-	//			detail::compute_equal<T, std::numeric_limits<T>::is_iec559>::call(v1.w, v2.w);
-	//	}
-	//};
-
-	//template<typename T, qualifier Q, int IsInt, std::size_t Size>
-	//struct compute_vec_nequal<4, T, Q, IsInt, Size, false>
-	//{
-	//	GLM_FUNC_QUALIFIER GLM_CONSTEXPR static bool call(vec<4, T, Q> const& v1, vec<4, T, Q> const& v2)
-	//	{
-	//		return !compute_vec_equal<4, T, Q, detail::is_int<T>::value, sizeof(T) * 8, detail::is_aligned<Q>::value>::call(v1, v2);
-	//	}
-	//};
-
-	//template<typename T, qualifier Q, int IsInt, std::size_t Size>
-	//struct compute_vec_bitwise_not<4, T, Q, IsInt, Size, false>
-	//{
-	//	GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<4, T, Q> call(vec<4, T, Q> const& v)
-	//	{
-	//		return vec<4, T, Q>(~v.x, ~v.y, ~v.z, ~v.w);
-	//	}
-	//};
 }//namespace detail
 
 	// -- Implicit basic constructors --
@@ -161,12 +41,6 @@ namespace detail
 	{}
 
 	template<typename T, qualifier Q>
-	GLM_FUNC_QUALIFIER GLM_CONSTEXPR void vec<4, T, Q>::load(const T* v)
-	{
-		detail::unaligned_load<4, T, Q, detail::is_aligned<Q>::value>::call(*this, v);
-	}
-
-	template <typename T, qualifier Q>
 	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<4, T, Q>::vec(T _x, T _y, T _z, T _w)
 		: x(_x), y(_y), z(_z), w(_w)
 	{}
@@ -1231,7 +1105,7 @@ namespace glm {
 	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<4, double, aligned_highp>::vec(const vec<4, double, packed_highp>& v)
 	{
 #	if (GLM_ARCH & GLM_ARCH_AVX_BIT)
-		data = _mm256_loadu_pd(&v);
+		data = _mm256_loadu_pd((double*)&v);
 #else
 		data.setv(0, _mm_loadu_pd((double*)&v));
 		data.setv(1, _mm_loadu_pd(((double*)&v)+2));

@@ -328,22 +328,22 @@ namespace detail
 		{
 			// see: https://www.onlinemathstutor.org/post/3x3_inverses
 
-			vec<4, T, qualifier(to_aligned<Q>::value)> a = toVec4W0(m[0]);
-			vec<4, T, qualifier(to_aligned<Q>::value)> b = toVec4W0(m[1]);
-			vec<4, T, qualifier(to_aligned<Q>::value)> c = toVec4W0(m[2]);
+			vec<4, T, Q> a = xyz0(m[0]);
+			vec<4, T, Q> b = xyz0(m[1]);
+			vec<4, T, Q> c = xyz0(m[2]);
 
-			T Determinant = compute_dot<vec<4, T, qualifier(to_aligned<Q>::value)>, T, true>::call(a, compute_cross<T, qualifier(to_aligned<Q>::value), true>::call(b, c));
-			T OneOverDeterminant = static_cast<T>(1) / Determinant;
-			vec<4, T, qualifier(to_aligned<Q>::value)> i0 = compute_cross<T, qualifier(to_aligned<Q>::value), true>::call(b, c);
-			vec<4, T, qualifier(to_aligned<Q>::value)> i1 = compute_cross<T, qualifier(to_aligned<Q>::value), true>::call(c, a);
-			vec<4, T, qualifier(to_aligned<Q>::value)> i2 = compute_cross<T, qualifier(to_aligned<Q>::value), true>::call(a, b);
+			vec<4, T, Q> i0 = compute_cross<T, Q, true>::call(b, c);
+			vec<4, T, Q> i1 = compute_cross<T, Q, true>::call(c, a);
+			vec<4, T, Q> i2 = compute_cross<T, Q, true>::call(a, b);
 
 			mat<3, 3, T, Q> Inverse;
-			Inverse[0] = toVec3(i0);
-			Inverse[1] = toVec3(i1);
-			Inverse[2] = toVec3(i2);
-
+			Inverse[0] = xyz(i0);
+			Inverse[1] = xyz(i1);
+			Inverse[2] = xyz(i2);
 			Inverse = transpose(Inverse);
+
+			T Determinant = compute_dot<vec<4, T, Q>, T, true>::call(a, compute_cross<T, Q, true>::call(b, c));
+			T OneOverDeterminant = static_cast<T>(1) / Determinant;
 			Inverse *= OneOverDeterminant;
 			return Inverse;
 		}

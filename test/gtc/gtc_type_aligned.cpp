@@ -169,6 +169,177 @@ static int test_copy_vec3()
 
 	return Error;
 }
+
+static int test_splat_vec3()
+{
+	int Error = 0;
+	{
+		glm::aligned_vec3 const u(1.f, 2.f, 3.f);
+		glm::aligned_vec3 const v(glm::splatX(u));
+		Error += v.x == u.x ? 0 : 1;
+		Error += v.y == u.x ? 0 : 1;
+		Error += v.z == u.x ? 0 : 1;
+	}
+
+	{
+		glm::aligned_vec3 const u(1.f, 2.f, 3.f);
+		glm::aligned_vec3 const v(glm::splatY(u));
+		Error += v.x == u.y ? 0 : 1;
+		Error += v.y == u.y ? 0 : 1;
+		Error += v.z == u.y ? 0 : 1;
+	}
+
+	{
+		glm::aligned_vec3 const u(1.f, 2.f, 3.f);
+		glm::aligned_vec3 const v(glm::splatZ(u));
+		Error += v.x == u.z ? 0 : 1;
+		Error += v.y == u.z ? 0 : 1;
+		Error += v.z == u.z ? 0 : 1;
+	}
+
+	{
+		glm::aligned_dvec3 const u(1., 2., 3.);
+		glm::aligned_dvec3 const v(glm::splatX(u));
+		Error += v.x == u.x ? 0 : 1;
+		Error += v.y == u.x ? 0 : 1;
+		Error += v.z == u.x ? 0 : 1;
+	}
+
+	{
+		glm::aligned_dvec3 const u(1., 2., 3.);
+		glm::aligned_dvec3 const v(glm::splatY(u));
+		Error += v.x == u.y ? 0 : 1;
+		Error += v.y == u.y ? 0 : 1;
+		Error += v.z == u.y ? 0 : 1;
+	}
+
+	{
+		glm::aligned_dvec3 const u(1., 2., 3.);
+		glm::aligned_dvec3 const v(glm::splatZ(u));
+		Error += v.x == u.z ? 0 : 1;
+		Error += v.y == u.z ? 0 : 1;
+		Error += v.z == u.z ? 0 : 1;
+	}
+
+	return Error;
+}
+
+static int test_splat_vec4()
+{
+	int Error = 0;
+	{
+		glm::aligned_vec4 const u(1.f, 2.f, 3.f, 4.f);
+		{
+			glm::aligned_vec4 const v(glm::splatX(u));
+			Error += v.x == u.x ? 0 : 1;
+			Error += v.y == u.x ? 0 : 1;
+			Error += v.z == u.x ? 0 : 1;
+			Error += v.w == u.x ? 0 : 1;
+		}
+
+		{
+			glm::aligned_vec4 const v(glm::splatY(u));
+			Error += v.x == u.y ? 0 : 1;
+			Error += v.y == u.y ? 0 : 1;
+			Error += v.z == u.y ? 0 : 1;
+			Error += v.w == u.y ? 0 : 1;
+		}
+
+		{
+			glm::aligned_vec4 const v(glm::splatZ(u));
+			Error += v.x == u.z ? 0 : 1;
+			Error += v.y == u.z ? 0 : 1;
+			Error += v.z == u.z ? 0 : 1;
+			Error += v.w == u.z ? 0 : 1;
+		}
+	}
+	{
+		glm::aligned_dvec4 const u(1.f, 2.f, 3.f, 4.f);
+		{
+			glm::aligned_dvec4 const v(glm::splatX(u));
+			Error += v.x == u.x ? 0 : 1;
+			Error += v.y == u.x ? 0 : 1;
+			Error += v.z == u.x ? 0 : 1;
+			Error += v.w == u.x ? 0 : 1;
+		}
+
+		{
+			glm::aligned_dvec4 const v(glm::splatY(u));
+			Error += v.x == u.y ? 0 : 1;
+			Error += v.y == u.y ? 0 : 1;
+			Error += v.z == u.y ? 0 : 1;
+			Error += v.w == u.y ? 0 : 1;
+		}
+
+		{
+			glm::aligned_dvec4 const v(glm::splatZ(u));
+			Error += v.x == u.z ? 0 : 1;
+			Error += v.y == u.z ? 0 : 1;
+			Error += v.z == u.z ? 0 : 1;
+			Error += v.w == u.z ? 0 : 1;
+		}
+	}
+	return Error;
+}
+
+static int test_copy_vec4_vec3()
+{
+	int Error = 0;
+
+	{
+		glm::aligned_vec3 const u(1.f, 2.f, 3.f);
+		glm::aligned_vec4 const v(glm::xyz0(u));
+		Error += v.x == u.x ? 0 : 1;
+		Error += v.y == u.y ? 0 : 1;
+		Error += v.z == u.z ? 0 : 1;
+		Error += v.w == 0.0f ? 0 : 1;
+	}
+
+	{
+		glm::aligned_vec3 const u(1.f, 2.f, 3.f);
+		glm::aligned_vec4 const v(glm::xyz1(u));
+		Error += v.x == u.x ? 0 : 1;
+		Error += v.y == u.y ? 0 : 1;
+		Error += v.z == u.z ? 0 : 1;
+		Error += v.w == 1.0f ? 0 : 1;
+	}
+
+	{
+		glm::aligned_dvec3 const u(1., 2., 3.);
+		glm::aligned_dvec4 const v(glm::xyz0(u));
+		Error += v.x == u.x ? 0 : 1;
+		Error += v.y == u.y ? 0 : 1;
+		Error += v.z == u.z ? 0 : 1;
+		Error += v.w == 0.0f ? 0 : 1;
+	}
+
+	{
+		glm::aligned_dvec3 const u(1., 2., 3.);
+		glm::aligned_dvec4 const v(glm::xyz1(u));
+		Error += v.x == u.x ? 0 : 1;
+		Error += v.y == u.y ? 0 : 1;
+		Error += v.z == u.z ? 0 : 1;
+		Error += v.w == 1.0f ? 0 : 1;
+	}
+
+	{
+		glm::aligned_vec4 const u(1.f, 2.f, 3.f, 4.f);
+		glm::aligned_vec3 const v(glm::xyz(u));
+		Error += v.x == u.x ? 0 : 1;
+		Error += v.y == u.y ? 0 : 1;
+		Error += v.z == u.z ? 0 : 1;
+	}
+
+	{
+		glm::aligned_dvec4 const u(1., 2., 3., 4.);
+		glm::aligned_dvec3 const v(glm::xyz(u));
+		Error += v.x == u.x ? 0 : 1;
+		Error += v.y == u.y ? 0 : 1;
+		Error += v.z == u.z ? 0 : 1;
+	}
+	return Error;
+}
+
 static int test_copy()
 {
 	int Error = 0;
@@ -274,6 +445,9 @@ int main()
 	Error += test_ctor();
 	Error += test_copy_vec4();
 	Error += test_copy_vec3();
+	Error += test_splat_vec3();
+	Error += test_splat_vec4();
+	Error += test_copy_vec4_vec3();
 	Error += test_copy();
 	Error += test_aligned_ivec4();
 	Error += test_aligned_mat4();

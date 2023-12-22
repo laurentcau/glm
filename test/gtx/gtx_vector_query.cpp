@@ -50,7 +50,7 @@ int test_isNull()
 {
 	int Error(0);
 	
-	bool TestA = glm::isNull(glm::vec4(0.), 0.00001f);
+	bool TestA = glm::isNull(glm::vec4(0), 0.00001f);
 	Error += TestA ? 0 : 1;
 
 	return Error;

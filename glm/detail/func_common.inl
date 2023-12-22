@@ -98,7 +98,7 @@ namespace glm
 namespace glm{
 namespace detail
 {
-	template<length_t L, typename T, qualifier Q, bool Simd>
+	template<length_t L, typename T, qualifier Q, bool Aligned>
 	struct compute_abs_vector
 	{
 		GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<L, T, Q> call(vec<L, T, Q> const& x)
@@ -107,7 +107,7 @@ namespace detail
 		}
 	};
 
-	template<length_t L, typename T, typename U, qualifier Q, bool Simd>
+	template<length_t L, typename T, typename U, qualifier Q, bool Aligned>
 	struct compute_mix_vector
 	{
 		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& x, vec<L, T, Q> const& y, vec<L, U, Q> const& a)
@@ -118,8 +118,8 @@ namespace detail
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q, bool Simd>
-	struct compute_mix_vector<L, T, bool, Q, Simd>
+	template<length_t L, typename T, qualifier Q, bool Aligned>
+	struct compute_mix_vector<L, T, bool, Q, Aligned>
 	{
 		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& x, vec<L, T, Q> const& y, vec<L, bool, Q> const& a)
 		{
@@ -130,7 +130,7 @@ namespace detail
 		}
 	};
 
-	template<length_t L, typename T, typename U, qualifier Q, bool Simd>
+	template<length_t L, typename T, typename U, qualifier Q, bool Aligned>
 	struct compute_mix_scalar
 	{
 		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& x, vec<L, T, Q> const& y, U const& a)
@@ -141,8 +141,8 @@ namespace detail
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q, bool Simd>
-	struct compute_mix_scalar<L, T, bool, Q, Simd>
+	template<length_t L, typename T, qualifier Q, bool Aligned>
+	struct compute_mix_scalar<L, T, bool, Q, Aligned>
 	{
 		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& x, vec<L, T, Q> const& y, bool const& a)
 		{
@@ -170,7 +170,7 @@ namespace detail
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q, bool isFloat, bool Simd>
+	template<length_t L, typename T, qualifier Q, bool isFloat, bool Aligned>
 	struct compute_sign
 	{
 		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& x)
@@ -180,8 +180,8 @@ namespace detail
 	};
 
 #	if GLM_ARCH == GLM_ARCH_X86
-	template<length_t L, typename T, qualifier Q, bool Simd>
-	struct compute_sign<L, T, Q, false, Simd>
+	template<length_t L, typename T, qualifier Q, bool Aligned>
+	struct compute_sign<L, T, Q, false, Aligned>
 	{
 		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& x)
 		{
@@ -193,7 +193,7 @@ namespace detail
 	};
 #	endif
 
-	template<length_t L, typename T, qualifier Q, bool Simd>
+	template<length_t L, typename T, qualifier Q, bool Aligned>
 	struct compute_floor
 	{
 		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& x)
@@ -202,7 +202,7 @@ namespace detail
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q, bool Simd>
+	template<length_t L, typename T, qualifier Q, bool Aligned>
 	struct compute_ceil
 	{
 		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& x)
@@ -211,7 +211,7 @@ namespace detail
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q, bool Simd>
+	template<length_t L, typename T, qualifier Q, bool Aligned>
 	struct compute_fract
 	{
 		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& x)
@@ -220,7 +220,7 @@ namespace detail
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q, bool Simd>
+	template<length_t L, typename T, qualifier Q, bool Aligned>
 	struct compute_trunc
 	{
 		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& x)
@@ -229,7 +229,7 @@ namespace detail
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q, bool Simd>
+	template<length_t L, typename T, qualifier Q, bool Aligned>
 	struct compute_round
 	{
 		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& x)
@@ -238,7 +238,7 @@ namespace detail
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q, bool Simd>
+	template<length_t L, typename T, qualifier Q, bool Aligned>
 	struct compute_mod
 	{
 		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b)
@@ -248,7 +248,7 @@ namespace detail
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q, bool Simd>
+	template<length_t L, typename T, qualifier Q, bool Aligned>
 	struct compute_fma
 	{
 		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& a, vec<L, T, Q> const& b, vec<L, T, Q> const& c)
@@ -269,7 +269,7 @@ namespace detail
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q, bool Simd>
+	template<length_t L, typename T, qualifier Q, bool Aligned>
 	struct compute_max_vector
 	{
 		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& x, vec<L, T, Q> const& y)
@@ -278,7 +278,7 @@ namespace detail
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q, bool Simd>
+	template<length_t L, typename T, qualifier Q, bool Aligned>
 	struct compute_clamp_vector
 	{
 		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& x, vec<L, T, Q> const& minVal, vec<L, T, Q> const& maxVal)
@@ -287,7 +287,7 @@ namespace detail
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q, bool Simd>
+	template<length_t L, typename T, qualifier Q, bool Aligned>
 	struct compute_step_vector
 	{
 		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& edge, vec<L, T, Q> const& x)
@@ -296,7 +296,7 @@ namespace detail
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q, bool Simd>
+	template<length_t L, typename T, qualifier Q, bool Aligned>
 	struct compute_smoothstep_vector
 	{
 		GLM_FUNC_QUALIFIER static vec<L, T, Q> call(vec<L, T, Q> const& edge0, vec<L, T, Q> const& edge1, vec<L, T, Q> const& x)
@@ -307,7 +307,7 @@ namespace detail
 		}
 	};
 
-	template<typename T, qualifier Q, bool Simd>
+	template<typename T, qualifier Q, bool Aligned>
 	struct convert_vec3_to_vec4W0
 	{
 		GLM_FUNC_QUALIFIER static vec<4, T, Q> call(vec<3, T, Q> const& a)
@@ -316,7 +316,25 @@ namespace detail
 		}
 	};
 
-	template<typename T, qualifier Q, bool Simd>
+	template<typename T, qualifier Q, bool Aligned>
+	struct convert_vec3_to_vec4WZ
+	{
+		GLM_FUNC_QUALIFIER static vec<4, T, Q> call(vec<3, T, Q> const& a)
+		{
+			return vec<4, T, Q>(a.x, a.y, a.z, a.z);
+		}
+	};
+
+	template<typename T, qualifier Q, bool Aligned>
+	struct convert_vec3_to_vec4W1
+	{
+		GLM_FUNC_QUALIFIER static vec<4, T, Q> call(vec<3, T, Q> const& a)
+		{
+			return vec<4, T, Q>(a.x, a.y, a.z, 1.0f);
+		}
+	};
+
+	template<typename T, qualifier Q, bool Aligned>
 	struct convert_vec4_to_vec3
 	{
 		GLM_FUNC_QUALIFIER static vec<4, T, Q> call(vec<3, T, Q> const& a)
@@ -325,7 +343,7 @@ namespace detail
 		}
 	};
 
-	template<length_t L, typename T, qualifier Q, bool Simd>
+	template<length_t L, typename T, qualifier Q, bool Aligned>
 	struct convert_splat {
 		template<int c>
 		GLM_FUNC_QUALIFIER GLM_CONSTEXPR static vec<L, T, Q> call(vec<L, T, Q> const& a)
@@ -503,13 +521,25 @@ namespace detail
 	}
 
 	template<typename T, qualifier Q>
-	GLM_FUNC_QUALIFIER vec<4, T, Q> toVec4W0(vec<3, T, Q> const& a)
+	GLM_FUNC_QUALIFIER vec<4, T, Q> xyz0(vec<3, T, Q> const& a)
 	{
 		return detail::convert_vec3_to_vec4W0<T, Q, detail::is_aligned<Q>::value>::call(a);
 	}
 
 	template<typename T, qualifier Q>
-	GLM_FUNC_QUALIFIER vec<3, T, Q> toVec3(vec<4, T, Q> const& a)
+	GLM_FUNC_QUALIFIER vec<4, T, Q> xyz1(vec<3, T, Q> const& a)
+	{
+		return detail::convert_vec3_to_vec4W1<T, Q, detail::is_aligned<Q>::value>::call(a);
+	}
+
+	template<typename T, qualifier Q>
+	GLM_FUNC_QUALIFIER vec<4, T, Q> xyzz(vec<3, T, Q> const& a)
+	{
+		return detail::convert_vec3_to_vec4WZ<T, Q, detail::is_aligned<Q>::value>::call(a);
+	}
+
+	template<typename T, qualifier Q>
+	GLM_FUNC_QUALIFIER vec<3, T, Q> xyz(vec<4, T, Q> const& a)
 	{
 		return detail::convert_vec4_to_vec3<T, Q, detail::is_aligned<Q>::value>::call(a);
 	}
@@ -779,7 +809,7 @@ namespace detail
 		return Result;
 	}
 
-	GLM_FUNC_QUALIFIER int floatBitsToInt(float const& v)
+	GLM_FUNC_QUALIFIER int floatBitsToInt(float v)
 	{
 		union
 		{
@@ -795,10 +825,10 @@ namespace detail
 	template<length_t L, qualifier Q>
 	GLM_FUNC_QUALIFIER vec<L, int, Q> floatBitsToInt(vec<L, float, Q> const& v)
 	{
-		return reinterpret_cast<vec<L, int, Q>&>(const_cast<vec<L, float, Q>&>(v));
+		return detail::functor1<vec, L, int, float, Q>::call(floatBitsToInt, v);
 	}
 
-	GLM_FUNC_QUALIFIER uint floatBitsToUint(float const& v)
+	GLM_FUNC_QUALIFIER uint floatBitsToUint(float v)
 	{
 		union
 		{
@@ -814,10 +844,10 @@ namespace detail
 	template<length_t L, qualifier Q>
 	GLM_FUNC_QUALIFIER vec<L, uint, Q> floatBitsToUint(vec<L, float, Q> const& v)
 	{
-		return reinterpret_cast<vec<L, uint, Q>&>(const_cast<vec<L, float, Q>&>(v));
+		return detail::functor1<vec, L, uint, float, Q>::call(floatBitsToUint, v);
 	}
 
-	GLM_FUNC_QUALIFIER float intBitsToFloat(int const& v)
+	GLM_FUNC_QUALIFIER float intBitsToFloat(int v)
 	{
 		union
 		{
@@ -833,10 +863,10 @@ namespace detail
 	template<length_t L, qualifier Q>
 	GLM_FUNC_QUALIFIER vec<L, float, Q> intBitsToFloat(vec<L, int, Q> const& v)
 	{
-		return reinterpret_cast<vec<L, float, Q>&>(const_cast<vec<L, int, Q>&>(v));
+		return detail::functor1<vec, L, float, int, Q>::call(intBitsToFloat, v);
 	}
 
-	GLM_FUNC_QUALIFIER float uintBitsToFloat(uint const& v)
+	GLM_FUNC_QUALIFIER float uintBitsToFloat(uint v)
 	{
 		union
 		{

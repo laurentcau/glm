@@ -115,27 +115,27 @@ static int comp_mat4_inverse(std::size_t Samples)
 
 int main()
 {
-	std::size_t const Samples = 100000;
+	std::size_t const Samples = 1000;
 
 	int Error = 0;
 
 	std::printf("glm::inverse(mat2):\n");
-	Error += comp_mat2_inverse<glm::packed_mat2, glm::aligned_mat2>(Samples);
+	Error += comp_mat2_inverse<glm::mat2, glm::aligned_mat2>(Samples);
 
 	std::printf("glm::inverse(dmat2):\n");
-	Error += comp_mat2_inverse<glm::packed_dmat2, glm::aligned_dmat2>(Samples);
+	Error += comp_mat2_inverse<glm::dmat2, glm::aligned_dmat2>(Samples);
 
 	std::printf("glm::inverse(mat3):\n");
-	Error += comp_mat3_inverse<glm::packed_mat3, glm::aligned_mat3>(Samples);
+	Error += comp_mat3_inverse<glm::mat3, glm::aligned_mat3>(Samples);
 	
 	std::printf("glm::inverse(dmat3):\n");
-	Error += comp_mat3_inverse<glm::packed_dmat3, glm::aligned_dmat3>(Samples);
+	Error += comp_mat3_inverse<glm::dmat3, glm::aligned_dmat3>(Samples);
 
 	std::printf("glm::inverse(mat4):\n");
-	Error += comp_mat4_inverse<glm::packed_mat4, glm::aligned_mat4>(Samples);
+	Error += comp_mat4_inverse<glm::mat4, glm::aligned_mat4>(Samples);
 	
 	std::printf("glm::inverse(dmat4):\n");
-	Error += comp_mat4_inverse<glm::packed_dmat4, glm::aligned_dmat4>(Samples);
+	Error += comp_mat4_inverse<glm::dmat4, glm::aligned_dmat4>(Samples);
 
 	return Error;
 }

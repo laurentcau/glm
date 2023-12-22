@@ -111,7 +111,6 @@ namespace glm
 
 		GLM_FUNC_DECL GLM_CONSTEXPR explicit vec(T scalar);
 		GLM_FUNC_DECL GLM_CONSTEXPR vec(T x, T y, T z, T w);
-		GLM_FUNC_DECL GLM_CONSTEXPR void load(const T* v);
 
 		// -- Conversion scalar constructors --
 

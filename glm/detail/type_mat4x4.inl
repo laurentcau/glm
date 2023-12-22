@@ -637,17 +637,17 @@ namespace glm
 		{
 			GLM_FUNC_QUALIFIER static mat<4, 4, T, Q> call(mat<4, 4, T, Q> const& m1, mat<4, 4, T, Q> const& m2)
 			{
-				typename mat<4, 4, T, qualifier(to_aligned<Q>::value)>::col_type const SrcA0 = m1[0];
-				typename mat<4, 4, T, qualifier(to_aligned<Q>::value)>::col_type const SrcA1 = m1[1];
-				typename mat<4, 4, T, qualifier(to_aligned<Q>::value)>::col_type const SrcA2 = m1[2];
-				typename mat<4, 4, T, qualifier(to_aligned<Q>::value)>::col_type const SrcA3 = m1[3];
+				typename mat<4, 4, T, Q>::col_type const SrcA0 = m1[0];
+				typename mat<4, 4, T, Q>::col_type const SrcA1 = m1[1];
+				typename mat<4, 4, T, Q>::col_type const SrcA2 = m1[2];
+				typename mat<4, 4, T, Q>::col_type const SrcA3 = m1[3];
 
-				typename mat<4, 4, T, qualifier(to_aligned<Q>::value)>::col_type const SrcB0 = m2[0];
-				typename mat<4, 4, T, qualifier(to_aligned<Q>::value)>::col_type const SrcB1 = m2[1];
-				typename mat<4, 4, T, qualifier(to_aligned<Q>::value)>::col_type const SrcB2 = m2[2];
-				typename mat<4, 4, T, qualifier(to_aligned<Q>::value)>::col_type const SrcB3 = m2[3];
+				typename mat<4, 4, T, Q>::col_type const SrcB0 = m2[0];
+				typename mat<4, 4, T, Q>::col_type const SrcB1 = m2[1];
+				typename mat<4, 4, T, Q>::col_type const SrcB2 = m2[2];
+				typename mat<4, 4, T, Q>::col_type const SrcB3 = m2[3];
 
-				mat<4, 4, T, qualifier(to_aligned<Q>::value)> Result;
+				mat<4, 4, T, Q> Result;
 				Result[0] = glm::fma(SrcA3, splatW(SrcB0), glm::fma(SrcA2, splatZ(SrcB0), glm::fma(SrcA1, splatY(SrcB0), SrcA0 * splatX(SrcB0))));
 				Result[1] = glm::fma(SrcA3, splatW(SrcB1), glm::fma(SrcA2, splatZ(SrcB1), glm::fma(SrcA1, splatY(SrcB1), SrcA0 * splatX(SrcB1))));
 				Result[2] = glm::fma(SrcA3, splatW(SrcB2), glm::fma(SrcA2, splatZ(SrcB2), glm::fma(SrcA1, splatY(SrcB2), SrcA0 * splatX(SrcB2))));

@@ -35,64 +35,13 @@ namespace detail
 		}
 	};
 
-//	template<qualifier Q>
-//	GLM_FUNC_QUALIFIER vec<4, float, Q> ToVec4W0(vec<3, float, Q> const& a)
-//	{
-//		vec<4, float, Q> v;
-//		glm_vec4 av4 = a.data;
-//		static const __m128i mask = _mm_set_epi32(0, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
-//		__m128 v0 = _mm_castsi128_ps(_mm_and_epi32(_mm_castps_si128(a.data), mask));
-//		v.data = v0;
-//		return v;
-//	}
-//
-//	template<qualifier Q>
-//	GLM_FUNC_QUALIFIER vec<4, double, Q> ToVec4W0(vec<3, double, Q> const& a)
-//	{
-//		vec<4, double, Q> v;
-//#if (GLM_ARCH & GLM_ARCH_AVX_BIT)
-//		glm_dvec4 av4 = a.data;
-//		static const __m256i mask = _mm256_set_epi64x(0, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF);
-//		__m256 v0 = _mm256_castsi256_pd(_mm256_and_epi64(_mm256_castpd_si256(a.data), mask));
-//		v.data = v0;
-//#else
-//		v.data.setv(0, a.data.getv(0));
-//		glm_dvec2 av2 = a.data.getv(1);
-//		av2.m128d_f64[1] = 0.0f;
-//		v.data.setv(1, av2);
-//#endif
-//		return v;
-//	}
-
-//	template<qualifier Q>
-//	GLM_FUNC_QUALIFIER vec<3, float, Q> ToVec3(vec<4, float, Q> const& a)
-//	{
-//		vec<3, float, Q> v;
-//		v.data = a.data;
-//		return v;
-//	}
-//
-//	template<qualifier Q>
-//	GLM_FUNC_QUALIFIER vec<3, double, Q> ToVec3(vec<4, double, Q> const& a)
-//	{
-//		vec<3, double, Q> v;
-//#if (GLM_ARCH & GLM_ARCH_AVX_BIT)
-//		v.data = a.data;
-//#else
-//		v.data.setv(0, a.data.getv(0));
-//		v.data.setv(1, a.data.getv(1));
-//#endif
-//		return v;
-//	}
-
-
 	template<qualifier Q>
 	struct compute_dot<vec<3, float, Q>, float, true>
 	{
 		GLM_FUNC_QUALIFIER static float call(vec<3, float, Q> const& a, vec<3, float, Q> const& b)
 		{
-			vec<4, float, Q> aa = toVec4W0(a);
-			vec<4, float, Q> bb = toVec4W0(b);
+			vec<4, float, Q> aa = xyz0(a);
+			vec<4, float, Q> bb = xyz0(b);
 			return _mm_cvtss_f32(glm_vec1_dot(aa.data, bb.data));
 		}
 	};
@@ -102,8 +51,8 @@ namespace detail
 	{
 		GLM_FUNC_QUALIFIER static vec<3, float, Q> call(vec<3, float, Q> const& a, vec<3, float, Q> const& b)
 		{
-			vec<4, float, Q> aa = toVec4W0(a);
-			vec<4, float, Q> bb = toVec4W0(b);
+			vec<4, float, Q> aa = xyz0(a);
+			vec<4, float, Q> bb = xyz0(b);
 			__m128 const xpd0 = glm_vec4_cross(aa.data, bb.data);
 
 			vec<3, float, Q> Result;

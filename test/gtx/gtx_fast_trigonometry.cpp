@@ -280,7 +280,7 @@ namespace taylorCos
 		glm::vec<L, T, Q> const Angle0_PI(abs(deterministic_fmod(x + glm::pi<T>(), glm::two_pi<T>()) - glm::pi<T>()));
 		glm::vec<L, bool, Q> const FirstQuarterPi(lessThanEqual(Angle0_PI, glm::vec<L, T, Q>(glm::half_pi<T>())));
 
-		glm::vec<L, T, Q> const RevertAngle(mix(glm::vec<L, T, Q>(glm::pi<T>()), glm::vec<L, T, Q>(T(0)), FirstQuarterPi));
+		glm::vec<L, T, Q> const RevertAngle(mix(glm::vec<L, T, Q>(glm::pi<T>()), glm::vec<L, T, Q>(0), FirstQuarterPi));
 		glm::vec<L, T, Q> const ReturnSign(mix(glm::vec<L, T, Q>(-1), glm::vec<L, T, Q>(1), FirstQuarterPi));
 		glm::vec<L, T, Q> const SectionAngle(RevertAngle - Angle0_PI);
 

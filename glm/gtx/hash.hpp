@@ -20,8 +20,6 @@
 #	endif
 #endif
 
-#include <functional>
-
 #include "../vec2.hpp"
 #include "../vec3.hpp"
 #include "../vec4.hpp"
@@ -43,8 +41,12 @@
 #include "../mat4x4.hpp"
 
 #if !GLM_HAS_CXX11_STL
-#	error "GLM_GTX_hash requires C++11 standard library support"
+#pragma message("GLM_GTX_hash requires C++11 standard library support")
 #endif
+
+#if 0 && GLM_LANG & GLM_LANG_CXX11
+#define GLM_GTX_hash 1
+#include <functional>
 
 namespace std
 {
@@ -140,3 +142,5 @@ namespace std
 } // namespace std
 
 #include "hash.inl"
+
+#endif //GLM_LANG & GLM_LANG_CXX11

@@ -851,6 +851,7 @@ namespace glm {
 	CTORSL(3, CTOR_DOUBLE_COPY3);
 	CTORSL(3, CTOR_FLOAT);
 	CTORSL(3, CTOR_FLOAT3);
+	CTORSL(3, CTOR_DOUBLE3);
 	CTORSL(3, CTOR_INT);
 	CTORSL(3, CTOR_INT3);
 	CTORSL(3, CTOR_VECF_INT3);
@@ -876,11 +877,6 @@ namespace glm {
 	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, float, aligned_highp>::vec(const vec<3, float, aligned_highp>& v) :
 		data(v.data) {}
 
-	//template<>
-	//template<>
-	//GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, float, aligned_highp>::vec(const vec<4, float, aligned_highp>& v) :
-	//	data(v.data) {}
-
 	template<>
 	template<>
 	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, float, aligned_highp>::vec(const vec<3, float, packed_highp>& v)
@@ -896,30 +892,6 @@ namespace glm {
 		__m128 mz = _mm_shuffle_ps(v.data, v.data, _MM_SHUFFLE(2, 2, 2, 2));
 		_mm_store_ss(((float*)(this))+2, mz);
 	}
-
-//	template<>
-//	template<>
-//	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, double, aligned_highp>::vec(const vec<3, double, aligned_highp>& v)
-//#	if (GLM_ARCH & GLM_ARCH_AVX_BIT)
-//		: data(v.data) {}
-//#else
-//	{
-//		data.setv(0, data.getv(0));
-//		data.setv(1, data.getv(1));
-//	}
-//#endif
-
-//	template<>
-//	template<>
-//	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vec<3, double, aligned_highp>::vec(const vec<4, double, aligned_highp>& v)
-//#if (GLM_ARCH & GLM_ARCH_AVX_BIT)
-//		: data(v.data) {}
-//#else
-//	{
-//		data.setv(0, v.data.getv(0));
-//		data.setv(1, v.data.getv(1));
-//	}
-//#endif
 
 	template<>
 	template<>

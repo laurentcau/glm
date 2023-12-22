@@ -15,6 +15,7 @@ namespace glm
 			aligned_highp, ///< Typed data is aligned in memory allowing SIMD optimizations and operations are executed with high precision in term of ULPs
 			aligned_mediump, ///< Typed data is aligned in memory allowing SIMD optimizations and operations are executed with high precision in term of ULPs for higher performance
 			aligned_lowp, // ///< Typed data is aligned in memory allowing SIMD optimizations and operations are executed with high precision in term of ULPs to maximize performance
+			aligned = aligned_highp, ///< By default aligned qualifier is also high precision
 #		endif
 
 		highp = packed_highp, ///< By default highp qualifier is also packed
@@ -22,16 +23,11 @@ namespace glm
 		lowp = packed_lowp, ///< By default lowp qualifier is also packed
 		packed = packed_highp, ///< By default packed qualifier is also high precision
 
-#		if GLM_CONFIG_ALIGNED_GENTYPES == GLM_ENABLE
-			aligned = aligned_highp, ///< By default aligned qualifier is also high precision
-#		endif
-
 #		if GLM_CONFIG_ALIGNED_GENTYPES == GLM_ENABLE && defined(GLM_FORCE_DEFAULT_ALIGNED_GENTYPES)
 			defaultp = aligned_highp
 #		else
 			defaultp = highp
 #		endif
-		
 	};
 
 	typedef qualifier precision;
@@ -84,32 +80,6 @@ namespace detail
 			static const bool value = true;
 		};
 #	endif
-
-
-		// convert unaligned simd type to aligned simd type
-		template<qualifier Q>
-		struct to_aligned {};
-
-#if GLM_CONFIG_SIMD == GLM_ENABLE
-		template<>
-		struct to_aligned<aligned_highp>
-		{
-			enum { value = aligned_highp };
-		};
-
-		template<>
-		struct to_aligned<aligned_lowp>
-		{
-			enum { value = aligned_lowp };
-		};
-
-		template<>
-		struct to_aligned<aligned_mediump>
-		{
-			enum { value = aligned_mediump };
-		};
-
-#endif
 
 	template<length_t L, typename T, bool is_aligned>
 	struct storage
@@ -180,20 +150,6 @@ namespace detail
 		typedef glm_f64vec2 type;
 	};
 
-/*
-	template<>
-	struct storage<2, double, false, true>
-	{
-		struct type
-		{
-			double data[2];
-			GLM_DEFAULTED_DEFAULT_CTOR_QUALIFIER GLM_CONSTEXPR type() GLM_DEFAULT;
-			type(glm_f64vec2 v) { _mm_storeu_pd(data, v); }
-			operator glm_f64vec2() const { return _mm_loadu_pd(data); }
-		};
-	};
-*/
-
 	template<>
 	struct storage<2, detail::int64, true>
 	{
@@ -236,44 +192,7 @@ namespace detail
 	template<>
 	struct storage<3, double, true> : public storage<4, double, true>
 	{};
-
-/*
-	template<>
-	struct storage<3, double, false, true>
-	{
-		struct type
-		{
-			double data[3];
-			GLM_DEFAULTED_DEFAULT_CTOR_QUALIFIER GLM_CONSTEXPR type() GLM_DEFAULT;
-#	if (GLM_ARCH & GLM_ARCH_AVX_BIT)
-			GLM_FUNC_QUALIFIER type(glm_f64vec4 v) {
-				__m256d T1 = _mm256_permute_pd(v, 1);
-				_mm_store_sd(&data[0], _mm256_castpd256_pd128(v));
-				_mm_store_sd(&data[1], _mm256_castpd256_pd128(T1));
-				_mm_store_sd(&data[2], _mm256_extractf128_pd(v, 1));
-			}
-			GLM_FUNC_QUALIFIER operator glm_f64vec4() const {
-				return _mm256_set_pd(data[2], data[2], data[1], data[0]);
-			}
-#	else
-			GLM_CONSTEXPR glm_f64vec2 getv(int i) const {
-				if (i == 0) 
-					return _mm_loadu_pd(data); 
-				else
-					return _mm_load_sd(&data[2]);
-			}
-			GLM_CONSTEXPR void setv(int i, const glm_f64vec2 &v)
-			{
-				if (i == 0)
-					_mm_storeu_pd(data, v);
-				else
-					_mm_store_sd(&data[2], v);
-			}
-#endif
-		};
-
-	};
-	*/
+	
 #	endif
 
 #	if (GLM_ARCH & GLM_ARCH_AVX2_BIT)
@@ -296,124 +215,31 @@ namespace detail
 	{
 		typedef glm_f32vec4 type;
 	};
-/*
-	template<>
-	struct storage<4, float, false, true>
-	{
-		typedef struct type {
-			float data[4];
-			GLM_DEFAULTED_DEFAULT_CTOR_QUALIFIER GLM_CONSTEXPR type() GLM_DEFAULT;
-			inline type(glm_f32vec4 v) { vst1q_f32(reinterpret_cast<float*>(data), v); }
-			inline operator glm_f32vec4() const { return vld1q_f32(reinterpret_cast<const float*>(data)); }
-		} type;
-	};
-*/
+
 	template<>
 	struct storage<3, float, true> : public storage<4, float, true>
 	{};
-/*
-	template<>
-	struct storage<3, float, false, true>
-	{
-		typedef struct type {
-			float data[3];
-			GLM_DEFAULTED_DEFAULT_CTOR_QUALIFIER GLM_CONSTEXPR type() GLM_DEFAULT;
-			inline type(glm_f32vec4 v) { 
-				data[0] = vgetq_lane_f32(v, 0);
-				data[1] = vgetq_lane_f32(v, 1);
-				data[2] = vgetq_lane_f32(v, 2);
-			}
-			inline operator glm_f32vec4() const { 
-				const float init[4] = {data[2],data[2],data[1],data[0]};
-				return vld1q_f32(init);
-			}
-		} type;
 
-	};
-*/
 	template<>
 	struct storage<4, int, true, true>
 	{
 		typedef glm_i32vec4 type;
 	};
-/*
-	template<>
-	struct storage<4, int, false, true>
-	{
-		struct type
-		{
-			int data[4];
-			GLM_DEFAULTED_DEFAULT_CTOR_QUALIFIER GLM_CONSTEXPR type() GLM_DEFAULT;
-			type(glm_i32vec4 v) { vst1q_s32(data, v); }
-			operator glm_i32vec4() const { return vld1q_s32(data); }
-		};
-	};
-*/
+
 	template<>
 	struct storage<3, int, true> : public storage<4, int, true>
 	{};
-/*
-	template<>
-	struct storage<3, int, false, true>
-	{
-		struct type
-		{
-			int data[3];
-			GLM_DEFAULTED_DEFAULT_CTOR_QUALIFIER GLM_CONSTEXPR type() GLM_DEFAULT;
-			inline type(glm_i32vec4 v) {
-				data[0] = vgetq_lane_s32(v, 0);
-				data[1] = vgetq_lane_s32(v, 1);
-				data[2] = vgetq_lane_s32(v, 2);
-			}
-			inline operator glm_i32vec4() const {
-				const int init[4] = { data[2], data[2], data[1], data[0] };
-				return vld1q_s32(init);
-			}
-		};
-	};
-*/
+
 	template<>
 	struct storage<4, unsigned int, true>
 	{
 		typedef glm_u32vec4 type;
 	};
-/*
-	template<>
-	struct storage<4, unsigned int, false, true>
-	{
-		struct type
-		{
-			unsigned int data[4];
-			GLM_DEFAULTED_DEFAULT_CTOR_QUALIFIER GLM_CONSTEXPR type() GLM_DEFAULT;
-			type(glm_u32vec4 v) { vst1q_u32(data, v); }
-			operator glm_u32vec4() const { return vld1q_u32(data); }
-		};
-	};
-*/
+
 	template<>
 	struct storage<3, unsigned int, true> : public storage<4, unsigned int, true>
 	{};
 
-/*
-	template<>
-	struct storage<3, unsigned int, false, true>
-	{
-		struct type
-		{
-			unsigned int data[3];
-			GLM_DEFAULTED_DEFAULT_CTOR_QUALIFIER GLM_CONSTEXPR type() GLM_DEFAULT;
-			inline type(glm_u32vec4 v) {
-				data[0] = vgetq_lane_u32(v, 0);
-				data[1] = vgetq_lane_u32(v, 1);
-				data[2] = vgetq_lane_u32(v, 2);
-			}
-			inline operator glm_u32vec4() const {
-				const unsigned int init[4] = { data[2], data[2], data[1], data[0] };
-				return vld1q_u32(init);
-			}
-		};
-	};
-*/
 	template<>
 	struct storage<3, double, true>
 	{
